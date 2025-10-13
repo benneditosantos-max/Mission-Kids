@@ -232,18 +232,22 @@ const ParentDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Dialog open={showCreateTask} onOpenChange={setShowCreateTask}>
-            <DialogTrigger asChild>
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0" data-testid="create-task-card">
-                <CardContent className="p-6 text-center">
-                  <Plus className="w-8 h-8 mx-auto mb-2" />
-                  <h3 className="font-bold font-nunito">Criar Missão</h3>
-                  <p className="text-blue-100 text-sm">Nova tarefa para as crianças</p>
-                </CardContent>
-              </Card>
-            </DialogTrigger>
+        {/* Main Content Card */}
+        <div className="bg-white rounded-3xl shadow-2xl min-h-screen p-6">
+          {/* Tasks Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold font-nunito text-gray-800">Tarefas</h2>
+              <Dialog open={showCreateTask} onOpenChange={setShowCreateTask}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl px-6 py-3 font-bold shadow-lg"
+                    data-testid="create-task-card"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Adicionar Tarefa
+                  </Button>
+                </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle className="font-nunito">Criar Nova Missão</DialogTitle>
