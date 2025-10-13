@@ -28,6 +28,8 @@ const ParentDashboard = () => {
   const [showGoalDialog, setShowGoalDialog] = useState(false);
   const [selectedChild, setSelectedChild] = useState(null);
   const [savingsGoals, setSavingsGoals] = useState({});
+  const [notifications, setNotifications] = useState([]);
+  const [pendingTasks, setPendingTasks] = useState([]);
 
   // Child registration form
   const [childForm, setChildForm] = useState({
