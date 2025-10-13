@@ -515,8 +515,17 @@ async def approve_task(task_id: str, current_user: dict = Depends(get_current_us
         raise HTTPException(status_code=403, detail="Only parents can approve tasks")
     
     task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
-    if not task or task["status"] != TaskStatus.COMPLETED.value:
-        raise HTTPException(status_code=400, detail="Task not ready for approval")
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Task must be awaiting validation
+    if task["status"] != TaskStatus.AWAITING_VALIDATION.value:
+        raise HTTPException(status_code=400, detail="Task is not awaiting validation")
+    
+    # Verify parent owns this child
+    child = await db.users.find_one({"id": task["child_id"]}, {"_id": 0})
+    if not child or child.get("parent_id") != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
     
     # Approve task
     await db.tasks.update_one(
@@ -527,7 +536,7 @@ async def approve_task(task_id: str, current_user: dict = Depends(get_current_us
         }}
     )
     
-    # Update child's XP, earned amount, and total allowance
+    # NOW credit R$, XP, and total allowance
     await db.users.update_one(
         {"id": task["child_id"]},
         {"$inc": {"xp": task["xp"], "earned": task["value"], "total_allowance": task["value"]}}
@@ -544,6 +553,24 @@ async def approve_task(task_id: str, current_user: dict = Depends(get_current_us
         )
     
     # Create transaction
+    transaction = Transaction(
+        child_id=task["child_id"],
+        task_id=task_id,
+        amount=task["value"],
+        type="task_completion",
+        description=f"Approved: {task['title']}"
+    )
+    trans_doc = transaction.model_dump()
+    trans_doc['created_at'] = trans_doc['created_at'].isoformat()
+    await db.transactions.insert_one(trans_doc)
+    
+    # Mark notification as read
+    await db.notifications.update_many(
+        {"task_id": task_id, "parent_id": current_user["id"]},
+        {"$set": {"read": True}}
+    )
+    
+    return {"success": True, "message": "Tarefa aprovada e creditada com sucesso!"}
     transaction = Transaction(
         child_id=task["child_id"],
         task_id=task_id,
