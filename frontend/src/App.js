@@ -15,6 +15,10 @@ import ChildDashboard from '@/components/ChildDashboard';
 import ParentDashboard from '@/components/ParentDashboard';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
+// Import Modern Design components
+import ModernLoginScreen from '@/components/ModernLoginScreen';
+import ModernChildDashboard from '@/components/ModernChildDashboard';
+
 // Import Firebase version
 import FirebaseApp from '@/components/FirebaseApp';
 
