@@ -1,395 +1,259 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
-  Star, Trophy, Coins, Target, Camera, CheckCircle, 
-  Clock, TrendingUp, Award, LogOut, RefreshCw 
+  Star, Trophy, Coins, Target, LogOut, RefreshCw,
+  Plus, ArrowRight, Clock, CheckCircle, Zap
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const ChildDashboard = () => {
+const ModernChildDashboard = () => {
   const { user, logout, playSound, updateUser } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [savingsGoals, setSavingsGoals] = useState([]);
-  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [completingTask, setCompletingTask] = useState(null);
-  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 'hero1');
 
-  const avatars = [
-    { id: 'hero1', name: '🦸‍♀️ Super Hero', price: 0 },
-    { id: 'wizard', name: '🧙‍♂️ Wizard', price: 50 },
-    { id: 'knight', name: '⚔️ Knight', price: 100 },
-    { id: 'ninja', name: '🥷 Ninja', price: 150 },
-    { id: 'pirate', name: '🏴‍☠️ Pirate', price: 200 },
-    { id: 'astronaut', name: '👨‍🚀 Astronaut', price: 300 }
+  // Mock tasks for demo - replace with real API calls
+  const mockTasks = [
+    { id: 1, title: "Arrumar a cama", value: 5.0, xp: 10, status: "pending" },
+    { id: 2, title: "Lavar a louça", value: 8.0, xp: 15, status: "pending" },
+    { id: 3, title: "Estudar matemática", value: 10.0, xp: 20, status: "completed" }
+  ];
+
+  const weeklyData = [
+    { day: "Dom", completed: 2 },
+    { day: "Seg", completed: 3 },
+    { day: "Ter", completed: 1 },
+    { day: "Qua", completed: 4 },
+    { day: "Qui", completed: 2 },
+    { day: "Sex", completed: 5 },
+    { day: "Sáb", completed: 3 }
   ];
 
   useEffect(() => {
-    fetchData();
+    // Simulate loading
+    setTimeout(() => {
+      setTasks(mockTasks);
+      setLoading(false);
+    }, 1000);
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const [tasksRes, goalsRes, transRes] = await Promise.all([
-        axios.get('/tasks'),
-        axios.get(`/savings-goals/${user.id}`),
-        axios.get(`/transactions/${user.id}`)
-      ]);
-      
-      setTasks(tasksRes.data);
-      setSavingsGoals(goalsRes.data);
-      setTransactions(transRes.data);
-    } catch (error) {
-      toast.error('Erro ao carregar dados');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCompleteTask = async (taskId) => {
-    setCompletingTask(taskId);
     try {
-      await axios.post(`/tasks/${taskId}/complete`);
+      // Update task locally for demo
+      setTasks(prev => prev.map(task => 
+        task.id === taskId ? { ...task, status: 'completed' } : task
+      ));
       
-      // Play success sound
       playSound('complete');
       toast.success('Missão concluída! 🎉');
-      
-      // Refresh data
-      await fetchData();
-      
-      // Get updated user info
-      const userRes = await axios.get('/users/me');
-      updateUser(userRes.data);
-      
     } catch (error) {
       toast.error('Erro ao concluir missão');
-    } finally {
-      setCompletingTask(null);
     }
   };
 
-  const handleAvatarChange = async (avatarId) => {
-    const avatar = avatars.find(a => a.id === avatarId);
-    if (avatar.price > user.xp) {
-      toast.error(`Você precisa de ${avatar.price} XP para desbloquear este avatar`);
-      return;
-    }
-
-    try {
-      await axios.put('/users/avatar', { avatar: avatarId });
-      setSelectedAvatar(avatarId);
-      updateUser({ ...user, avatar: avatarId });
-      playSound('success');
-      toast.success('Avatar atualizado! ✨');
-    } catch (error) {
-      toast.error('Erro ao atualizar avatar');
-    }
-  };
-
-  const getTaskIcon = (status) => {
-    switch (status) {
-      case 'approved': return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'completed': return <Clock className="w-5 h-5 text-blue-500" />;
-      default: return <Star className="w-5 h-5 text-yellow-500" />;
-    }
-  };
-
-  const getTaskBadgeColor = (status) => {
-    switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-
-  const allowanceProgress = user ? (user.earned / user.allowance_goal) * 100 : 0;
   const currentLevel = user?.level || 1;
+  const currentXp = user?.xp || 150;
   const xpForNextLevel = currentLevel * 100;
-  const currentXp = user?.xp || 0;
   const xpProgress = ((currentXp % 100) / 100) * 100;
+  const balance = user?.earned || 42.50;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 flex items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
-          <p className="text-lg font-nunito text-gray-600">Carregando suas missões...</p>
+          <RefreshCw className="w-8 h-8 animate-spin text-white mx-auto mb-4" />
+          <p className="text-lg font-nunito text-white">Carregando suas missões...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Avatar className="h-12 w-12 ring-4 ring-indigo-200">
-                <AvatarImage src={`/avatars/${selectedAvatar}.png`} />
-                <AvatarFallback className="bg-indigo-600 text-white text-xl">
-                  {avatars.find(a => a.id === selectedAvatar)?.name.slice(0, 2) || '🦸'}
+              <Avatar className="h-12 w-12 ring-4 ring-white/30">
+                <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-xl">
+                  👦
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-xl font-bold font-nunito text-gray-800">Olá, {user?.name}!</h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <span className="flex items-center">
-                    <Trophy className="w-4 h-4 mr-1 text-yellow-500" />
-                    Nível {currentLevel}
-                  </span>
-                  <span className="flex items-center">
-                    <Star className="w-4 h-4 mr-1 text-purple-500" />
-                    {currentXp} XP
-                  </span>
-                  <span className="flex items-center">
-                    <Coins className="w-4 h-4 mr-1 text-green-500" />
-                    R$ {user?.earned?.toFixed(2) || '0.00'}
-                  </span>
-                </div>
+                <h1 className="text-xl font-bold font-nunito text-white">
+                  Mesh
+                </h1>
+                <p className="text-white/80 text-sm">
+                  Bem-vindo, {user?.name || 'Gabriel'}
+                </p>
               </div>
             </div>
-            <Button variant="outline" onClick={logout} data-testid="logout-btn">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+                <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center">
+                  <Coins className="w-3 h-3 text-white" />
+                </div>
+                <span className="text-white font-bold">200</span>
+              </div>
+              <Button 
+                variant="ghost" 
+                onClick={logout}
+                className="text-white hover:bg-white/20"
+                data-testid="logout-btn"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Progress Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* XP Progress */}
-          <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-bold font-nunito">Nível {currentLevel}</h3>
-                  <p className="text-purple-100">Próximo nível: {xpForNextLevel} XP</p>
-                </div>
-                <Trophy className="w-8 h-8 text-yellow-300" />
+        {/* Main Content Card */}
+        <div className="bg-white rounded-3xl shadow-2xl min-h-screen p-6">
+          {/* Progress Banner */}
+          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-6 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">
+                  Você já ganhou 50 de 100! 🎯
+                </h3>
+                <Progress value={50} className="w-64 h-3 bg-yellow-200" />
               </div>
-              <Progress value={xpProgress} className="h-3 bg-purple-300" />
-              <p className="text-sm text-purple-100 mt-2">
-                {currentXp % 100} / 100 XP para o próximo nível
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Allowance Progress */}
-          <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-bold font-nunito">Mesada</h3>
-                  <p className="text-green-100">Meta: R$ {user?.allowance_goal?.toFixed(2) || '0.00'}</p>
-                </div>
-                <Coins className="w-8 h-8 text-yellow-300" />
+              <div className="text-6xl">
+                🏆
               </div>
-              <Progress value={allowanceProgress} className="h-3 bg-green-300" />
-              <p className="text-sm text-green-100 mt-2">
-                R$ {user?.earned?.toFixed(2) || '0.00'} de R$ {user?.allowance_goal?.toFixed(2) || '0.00'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="missions" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="missions" className="font-nunito" data-testid="missions-tab">🎯 Missões</TabsTrigger>
-            <TabsTrigger value="savings" className="font-nunito" data-testid="savings-tab">💰 Poupança</TabsTrigger>
-            <TabsTrigger value="avatar" className="font-nunito" data-testid="avatar-tab">🎨 Avatar</TabsTrigger>
-          </TabsList>
-
-          {/* Missions Tab */}
-          <TabsContent value="missions" className="space-y-4">
-            <div className="grid gap-4">
-              {tasks.length === 0 ? (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-nunito text-gray-600 mb-2">Nenhuma missão disponível</h3>
-                    <p className="text-gray-500">Seus pais ainda não criaram missões para você!</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                tasks.map((task) => (
-                  <Card key={task.id} className="mission-card hover:shadow-lg transition-all duration-300" data-testid={`task-card-${task.id}`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          {getTaskIcon(task.status)}
-                          <div>
-                            <h3 className="font-bold font-nunito text-gray-800">{task.title}</h3>
-                            {task.description && (
-                              <p className="text-sm text-gray-600">{task.description}</p>
-                            )}
-                          </div>
-                        </div>
-                        <Badge className={`${getTaskBadgeColor(task.status)} font-nunito`}>
-                          {task.status === 'approved' ? 'Aprovada' :
-                           task.status === 'completed' ? 'Aguardando' : 'Pendente'}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4 text-sm">
-                          <span className="flex items-center text-green-600">
-                            <Coins className="w-4 h-4 mr-1" />
-                            R$ {task.value.toFixed(2)}
-                          </span>
-                          <span className="flex items-center text-purple-600">
-                            <Star className="w-4 h-4 mr-1" />
-                            {task.xp} XP
-                          </span>
-                          <span className="text-gray-500">
-                            {task.frequency === 'daily' ? '📅 Diária' :
-                             task.frequency === 'weekly' ? '📅 Semanal' : '📅 Mensal'}
-                          </span>
-                        </div>
-
-                        {task.status === 'pending' && (
-                          <Button
-                            onClick={() => handleCompleteTask(task.id)}
-                            disabled={completingTask === task.id}
-                            className="bg-indigo-600 hover:bg-indigo-700 font-nunito"
-                            data-testid={`complete-task-${task.id}`}
-                          >
-                            {completingTask === task.id ? (
-                              <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                            ) : (
-                              <CheckCircle className="w-4 h-4 mr-2" />
-                            )}
-                            Concluir
-                          </Button>
-                        )}
-                      </div>
-
-                      {task.photo_required && (
-                        <div className="mt-4 p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
-                          <div className="flex items-center text-yellow-700">
-                            <Camera className="w-4 h-4 mr-2" />
-                            <span className="text-sm font-medium">Foto obrigatória</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {task.approval_required && (
-                        <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                          <div className="flex items-center text-blue-700">
-                            <Award className="w-4 h-4 mr-2" />
-                            <span className="text-sm font-medium">Precisa de aprovação dos pais</span>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))
-              )}
             </div>
-          </TabsContent>
+          </div>
 
-          {/* Savings Tab */}
-          <TabsContent value="savings">
-            <div className="grid gap-4">
-              {savingsGoals.length === 0 ? (
-                <Card className="text-center py-12">
-                  <CardContent>
-                    <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-nunito text-gray-600 mb-2">Nenhuma meta de poupança</h3>
-                    <p className="text-gray-500">Peça para seus pais criarem metas para você!</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                savingsGoals.map((goal) => {
-                  const progress = (goal.progress / goal.target) * 100;
-                  return (
-                    <Card key={goal.id} className="hover:shadow-lg transition-shadow" data-testid={`savings-goal-${goal.id}`}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-bold font-nunito text-gray-800">{goal.name}</h3>
-                          <Badge variant="outline" className="font-nunito">
-                            {progress.toFixed(0)}% completo
-                          </Badge>
-                        </div>
-                        <Progress value={progress} className="h-3 mb-3" />
-                        <div className="flex justify-between text-sm text-gray-600">
-                          <span>R$ {goal.progress.toFixed(2)}</span>
-                          <span>Meta: R$ {goal.target.toFixed(2)}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })
-              )}
+          {/* Tasks Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold font-nunito text-gray-800">Tarefas</h2>
+              <Button 
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl px-6 py-3 font-bold shadow-lg"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Adicionar Tarefa
+              </Button>
             </div>
-          </TabsContent>
 
-          {/* Avatar Tab */}
-          <TabsContent value="avatar">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-nunito">🎨 Loja de Avatares</CardTitle>
-                <CardDescription>
-                  Use seu XP para desbloquear novos avatares incríveis!
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {avatars.map((avatar) => {
-                    const isOwned = avatar.price <= currentXp;
-                    const isSelected = selectedAvatar === avatar.id;
-                    
-                    return (
-                      <div
-                        key={avatar.id}
-                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                          isSelected
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : isOwned
-                            ? 'border-gray-200 hover:border-gray-300 bg-white'
-                            : 'border-gray-100 bg-gray-50 cursor-not-allowed'
-                        }`}
-                        onClick={() => isOwned && handleAvatarChange(avatar.id)}
-                        data-testid={`avatar-${avatar.id}`}
+            <div className="space-y-4">
+              {tasks.map((task) => (
+                <div 
+                  key={task.id} 
+                  className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all duration-300"
+                  data-testid={`task-card-${task.id}`}
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      task.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                    }`}>
+                      {task.status === 'completed' ? (
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      ) : (
+                        <Clock className="w-5 h-5 text-white" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{task.title}</h3>
+                      <div className="flex items-center space-x-3 text-sm text-gray-600">
+                        <span className="flex items-center">
+                          <Coins className="w-4 h-4 mr-1 text-green-500" />
+                          R$ {task.value.toFixed(2)}
+                        </span>
+                        <span className="flex items-center">
+                          <Star className="w-4 h-4 mr-1 text-purple-500" />
+                          {task.xp} XP
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3">
+                    {task.status === 'pending' && (
+                      <Button
+                        onClick={() => handleCompleteTask(task.id)}
+                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-4 py-2 font-medium"
+                        data-testid={`complete-task-${task.id}`}
                       >
-                        <div className="text-center">
-                          <div className="text-4xl mb-2">{avatar.name.slice(0, 2)}</div>
-                          <h4 className="font-nunito font-semibold text-sm">{avatar.name.slice(3)}</h4>
-                          <div className="mt-2">
-                            {avatar.price === 0 ? (
-                              <Badge className="bg-green-100 text-green-800">Grátis</Badge>
-                            ) : isOwned ? (
-                              <Badge className="bg-blue-100 text-blue-800">Desbloqueado</Badge>
-                            ) : (
-                              <Badge variant="outline">{avatar.price} XP</Badge>
-                            )}
-                          </div>
-                          {isSelected && (
-                            <Badge className="bg-indigo-600 text-white mt-1">Ativo</Badge>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                        Concluir
+                      </Button>
+                    )}
+                    <ArrowRight className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              ))}
+            </div>
+          </div>
+
+          {/* Weekly Summary */}
+          <div className="mb-8">
+            <h2 className="text-xl font-bold font-nunito text-gray-800 mb-4">Resumo da semana</h2>
+            <div className="bg-gray-50 rounded-2xl p-6">
+              <div className="flex items-end justify-between space-x-2 h-32">
+                {weeklyData.map((day, index) => (
+                  <div key={day.day} className="flex flex-col items-center space-y-2">
+                    <div 
+                      className="bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg w-8 transition-all duration-500"
+                      style={{ 
+                        height: `${(day.completed / 5) * 100}%`,
+                        minHeight: '20px'
+                      }}
+                    ></div>
+                    <span className="text-xs font-medium text-gray-600">{day.day}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600">
+                  Total de tarefas concluídas esta semana: <span className="font-bold text-blue-600">20</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Add Goal Button */}
+          <div className="text-center">
+            <Button 
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl px-8 py-4 font-bold text-lg shadow-lg"
+            >
+              <Target className="w-5 h-5 mr-2" />
+              Adicionar Meta
+            </Button>
+          </div>
+
+          {/* Shop Section Preview */}
+          <div className="mt-8">
+            <h2 className="text-xl font-bold font-nunito text-gray-800 mb-4">Loja</h2>
+            <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 text-center">
+              <div className="text-6xl mb-4">🎁</div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">
+                Desbloqueie recompensas incríveis!
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Use seus pontos para comprar avatares, jogos e muito mais
+              </p>
+              <Button 
+                className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-2xl px-6 py-3 font-bold"
+              >
+                Ver Loja
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default ChildDashboard;
+export default ModernChildDashboard;
