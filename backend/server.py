@@ -211,11 +211,13 @@ async def login(login_data: UserLogin):
             raise HTTPException(status_code=401, detail="Invalid PIN")
     else:
         # For parents, verify password
-        if not login_data.password or not verify_password(login_data.password, user["password"]):
+        if not login_data.password or not user.get("password") or not verify_password(login_data.password, user["password"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    # Remove password from user data before returning
+    user_response = {k: v for k, v in user.items() if k != "password"}
     token = create_access_token({"user_id": user["id"], "role": user["role"]})
-    return {"token": token, "user": user}
+    return {"token": token, "user": user_response}
 
 # User routes
 @api_router.get("/users/me")
