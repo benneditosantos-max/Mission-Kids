@@ -233,7 +233,11 @@ async def get_children(current_user: dict = Depends(get_current_user)):
     return children
 
 @api_router.put("/users/avatar")
-async def update_avatar(avatar: str, current_user: dict = Depends(get_current_user)):
+async def update_avatar(request: dict, current_user: dict = Depends(get_current_user)):
+    avatar = request.get("avatar")
+    if not avatar:
+        raise HTTPException(status_code=400, detail="Avatar is required")
+    
     await db.users.update_one(
         {"id": current_user["id"]},
         {"$set": {"avatar": avatar}}
