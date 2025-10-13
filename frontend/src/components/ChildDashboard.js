@@ -84,7 +84,7 @@ const ChildDashboard = () => {
     }
 
     try {
-      await axios.put('/users/avatar', null, { params: { avatar: avatarId } });
+      await axios.put('/users/avatar', { avatar: avatarId });
       setSelectedAvatar(avatarId);
       updateUser({ ...user, avatar: avatarId });
       playSound('success');
