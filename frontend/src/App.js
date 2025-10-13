@@ -61,7 +61,7 @@ function AppContent() {
         element={
           user.role === 'child' ? 
             <ModernChildDashboard /> : 
-            <ParentDashboard />
+            <ModernParentDashboard />
         } 
       />
       <Route path="*" element={<Navigate to="/" replace />} />
