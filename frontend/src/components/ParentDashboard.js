@@ -68,6 +68,56 @@ const ModernParentDashboard = () => {
     }
   };
 
+  const handleCreateChild = async (e) => {
+    e.preventDefault();
+    
+    if (!childForm.name || !childForm.age || !childForm.email || !childForm.pin) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+
+    if (parseInt(childForm.age) < 5 || parseInt(childForm.age) > 18) {
+      toast.error('Idade deve estar entre 5 e 18 anos');
+      return;
+    }
+
+    if (childForm.pin.length !== 4 || !/^\d{4}$/.test(childForm.pin)) {
+      toast.error('PIN deve ter exatamente 4 dígitos');
+      return;
+    }
+
+    try {
+      await axios.post('/auth/register', {
+        email: childForm.email,
+        name: childForm.name,
+        password: childForm.pin, // PIN is treated as password for children
+        role: 'child',
+        pin: childForm.pin,
+        parent_id: user.id,
+        allowance_goal: parseFloat(childForm.allowance_goal)
+      });
+      
+      toast.success(`${childForm.name} foi cadastrado(a) com sucesso! 👶`);
+      setShowCreateChild(false);
+      
+      // Reset form
+      setChildForm({
+        name: '',
+        age: '',
+        email: '',
+        pin: '',
+        allowance_goal: 50
+      });
+      
+      // Refresh data
+      fetchData();
+      
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Erro ao cadastrar criança';
+      toast.error(message);
+    }
+  };
+
   const handleCreateTask = async (e) => {
     e.preventDefault();
     
@@ -77,18 +127,12 @@ const ModernParentDashboard = () => {
     }
 
     try {
-      // Mock task creation
-      const newTask = {
-        id: tasks.length + 1,
-        title: taskForm.title,
-        description: taskForm.description,
-        child_name: children.find(c => c.id == taskForm.child_id)?.name || 'Criança',
+      await axios.post('/tasks', {
+        ...taskForm,
         value: parseFloat(taskForm.value),
-        xp: parseInt(taskForm.xp),
-        status: 'pending'
-      };
-
-      setTasks(prev => [...prev, newTask]);
+        xp: parseInt(taskForm.xp)
+      });
+      
       toast.success('Tarefa criada com sucesso! 🎯');
       setShowCreateTask(false);
       
@@ -103,6 +147,8 @@ const ModernParentDashboard = () => {
         photo_required: false,
         approval_required: true
       });
+      
+      fetchData();
       
     } catch (error) {
       toast.error('Erro ao criar tarefa');
