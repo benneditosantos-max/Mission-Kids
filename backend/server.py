@@ -445,13 +445,13 @@ async def complete_task(task_id: str, current_user: dict = Depends(get_current_u
     if current_user["role"] == "child" and task["child_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    # Update task status
+    # Update task status to AWAITING_VALIDATION (do NOT credit R$/XP yet)
     update_data = {
-        "status": TaskStatus.COMPLETED.value,
+        "status": TaskStatus.AWAITING_VALIDATION.value,
         "completed_at": datetime.now(timezone.utc).isoformat()
     }
     
-    # If no approval required, auto-approve and add XP/money
+    # If no approval required, auto-approve and add XP/money immediately
     if not task["approval_required"]:
         update_data["status"] = TaskStatus.APPROVED.value
         update_data["approved_at"] = datetime.now(timezone.utc).isoformat()
@@ -491,7 +491,23 @@ async def complete_task(task_id: str, current_user: dict = Depends(get_current_u
         await db.transactions.insert_one(trans_doc)
     
     await db.tasks.update_one({"id": task_id}, {"$set": update_data})
-    return {"success": True}
+    
+    # Create mock notification for parents (if approval required)
+    if task["approval_required"]:
+        child = await db.users.find_one({"id": task["child_id"]}, {"_id": 0})
+        notification_message = f"🎯 {child['name']} concluiu a tarefa '{task['title']}' e aguarda sua aprovação!"
+        # Store notification in database (mock)
+        await db.notifications.insert_one({
+            "id": str(uuid.uuid4()),
+            "parent_id": child.get("parent_id"),
+            "child_id": task["child_id"],
+            "task_id": task_id,
+            "message": notification_message,
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    return {"success": True, "status": update_data["status"]}
 
 @api_router.post("/tasks/{task_id}/approve")
 async def approve_task(task_id: str, current_user: dict = Depends(get_current_user)):
