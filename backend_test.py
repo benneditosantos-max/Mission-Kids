@@ -246,36 +246,155 @@ class MissionKidsAPITester:
         
         return False
 
-    def test_create_task(self):
-        """Test creating a task"""
+    def test_create_multiple_tasks(self):
+        """Test creating multiple tasks with varying R$ values and XP"""
         if not self.parent_token or not self.child_id:
-            self.log_test("Create Task", False, "Missing parent token or child ID")
+            self.log_test("Create Multiple Tasks", False, "Missing parent token or child ID")
             return False
             
-        data = {
-            "title": "Test Task",
-            "description": "This is a test task",
-            "child_id": self.child_id,
-            "value": 5.0,
-            "xp": 10,
-            "frequency": "daily",
-            "photo_required": False,
-            "approval_required": True
-        }
+        tasks_data = [
+            {"title": "Clean Room", "value": 5.0, "xp": 10, "approval_required": False},
+            {"title": "Do Homework", "value": 10.0, "xp": 20, "approval_required": False},
+            {"title": "Help with Dishes", "value": 15.0, "xp": 30, "approval_required": False}
+        ]
         
-        response = self.make_request('POST', 'tasks', data, token=self.parent_token)
+        self.task_ids = []
         
-        if response and response.status_code == 200:
-            task_data = response.json()
-            if 'id' in task_data:
-                self.task_id = task_data['id']
-                self.log_test("Create Task", True)
+        for task_data in tasks_data:
+            data = {
+                "title": task_data["title"],
+                "description": f"Test task: {task_data['title']}",
+                "child_id": self.child_id,
+                "value": task_data["value"],
+                "xp": task_data["xp"],
+                "frequency": "daily",
+                "photo_required": False,
+                "approval_required": task_data["approval_required"]
+            }
+            
+            response = self.make_request('POST', 'tasks', data, token=self.parent_token)
+            
+            if response and response.status_code == 200:
+                task_result = response.json()
+                if 'id' in task_result:
+                    self.task_ids.append(task_result['id'])
+                else:
+                    self.log_test("Create Multiple Tasks", False, f"Missing task ID for {task_data['title']}")
+                    return False
+            else:
+                error_msg = response.json().get('detail', 'Unknown error') if response else 'No response'
+                self.log_test("Create Multiple Tasks", False, f"Failed to create {task_data['title']}: {error_msg}")
+                return False
+        
+        if len(self.task_ids) == 3:
+            self.task_id = self.task_ids[0]  # Set first task for other tests
+            self.log_test("Create Multiple Tasks", True)
+            return True
+        else:
+            self.log_test("Create Multiple Tasks", False, f"Only created {len(self.task_ids)} out of 3 tasks")
+            return False
+
+    def test_complete_tasks_and_verify_financials(self):
+        """Test completing tasks and verify financial updates"""
+        if not self.child_token or not hasattr(self, 'task_ids') or len(self.task_ids) < 3:
+            self.log_test("Complete Tasks & Verify Financials", False, "Missing child token or task IDs")
+            return False
+        
+        # Get initial financial state
+        initial_response = self.make_request('GET', f'children/{self.child_id}/financial', token=self.child_token)
+        if not initial_response or initial_response.status_code != 200:
+            self.log_test("Complete Tasks & Verify Financials", False, "Cannot get initial financial data")
+            return False
+        
+        initial_data = initial_response.json()
+        initial_balance = initial_data.get('balance', 0)
+        initial_total_allowance = initial_data.get('total_allowance', 0)
+        initial_xp = initial_data.get('xp', 0)
+        initial_level = initial_data.get('level', 1)
+        
+        # Complete all tasks
+        expected_value_increase = 5.0 + 10.0 + 15.0  # Total R$ from tasks
+        expected_xp_increase = 10 + 20 + 30  # Total XP from tasks
+        
+        for task_id in self.task_ids:
+            response = self.make_request('POST', f'tasks/{task_id}/complete', token=self.child_token)
+            if not response or response.status_code != 200:
+                self.log_test("Complete Tasks & Verify Financials", False, f"Failed to complete task {task_id}")
+                return False
+        
+        # Get updated financial state
+        final_response = self.make_request('GET', f'children/{self.child_id}/financial', token=self.child_token)
+        if not final_response or final_response.status_code != 200:
+            self.log_test("Complete Tasks & Verify Financials", False, "Cannot get final financial data")
+            return False
+        
+        final_data = final_response.json()
+        final_balance = final_data.get('balance', 0)
+        final_total_allowance = final_data.get('total_allowance', 0)
+        final_xp = final_data.get('xp', 0)
+        final_level = final_data.get('level', 1)
+        
+        # Verify financial updates
+        balance_increase = final_balance - initial_balance
+        allowance_increase = final_total_allowance - initial_total_allowance
+        xp_increase = final_xp - initial_xp
+        
+        if (abs(balance_increase - expected_value_increase) < 0.01 and
+            abs(allowance_increase - expected_value_increase) < 0.01 and
+            xp_increase == expected_xp_increase):
+            
+            # Check level calculation (level up every 100 XP)
+            expected_level = (final_xp // 100) + 1
+            if final_level == expected_level:
+                self.log_test("Complete Tasks & Verify Financials", True)
                 return True
             else:
-                self.log_test("Create Task", False, "Missing task ID in response")
+                self.log_test("Complete Tasks & Verify Financials", False, f"Level calculation incorrect: expected {expected_level}, got {final_level}")
+        else:
+            self.log_test("Complete Tasks & Verify Financials", False, 
+                         f"Financial updates incorrect - Balance: +{balance_increase} (expected +{expected_value_increase}), "
+                         f"Allowance: +{allowance_increase} (expected +{expected_value_increase}), "
+                         f"XP: +{xp_increase} (expected +{expected_xp_increase})")
+        
+        return False
+
+    def test_financial_data_endpoint(self):
+        """Test GET /api/children/{child_id}/financial endpoint"""
+        if not self.child_token or not self.child_id:
+            self.log_test("Financial Data Endpoint", False, "Missing child token or child ID")
+            return False
+            
+        response = self.make_request('GET', f'children/{self.child_id}/financial', token=self.child_token)
+        
+        if response and response.status_code == 200:
+            data = response.json()
+            required_fields = ['balance', 'total_allowance', 'xp', 'level', 'xp_progress', 
+                             'xp_for_next_level', 'savings_goals', 'recent_transactions']
+            
+            missing_fields = [field for field in required_fields if field not in data]
+            if not missing_fields:
+                # Verify XP calculations
+                xp = data.get('xp', 0)
+                level = data.get('level', 1)
+                xp_progress = data.get('xp_progress', 0)
+                xp_for_next_level = data.get('xp_for_next_level', 100)
+                
+                expected_xp_progress = xp % 100
+                expected_xp_for_next_level = level * 100
+                
+                if (xp_progress == expected_xp_progress and 
+                    xp_for_next_level == expected_xp_for_next_level):
+                    self.log_test("Financial Data Endpoint", True)
+                    return True
+                else:
+                    self.log_test("Financial Data Endpoint", False, 
+                                 f"XP calculations incorrect - Progress: {xp_progress} (expected {expected_xp_progress}), "
+                                 f"Next level: {xp_for_next_level} (expected {expected_xp_for_next_level})")
+            else:
+                self.log_test("Financial Data Endpoint", False, f"Missing required fields: {missing_fields}")
         else:
             error_msg = response.json().get('detail', 'Unknown error') if response else 'No response'
-            self.log_test("Create Task", False, f"Status: {response.status_code if response else 'None'}, Error: {error_msg}")
+            self.log_test("Financial Data Endpoint", False, f"Status: {response.status_code if response else 'None'}, Error: {error_msg}")
         
         return False
 
