@@ -16,9 +16,13 @@ import { toast } from 'sonner';
 const ModernChildDashboard = () => {
   const { user, logout, playSound, updateUser } = useAuth();
   const [tasks, setTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
   const [savingsGoals, setSavingsGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [financialData, setFinancialData] = useState(null);
+  const [currentFilter, setCurrentFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 10;
 
   const weeklyData = [
     { day: "Dom", completed: 2 },
