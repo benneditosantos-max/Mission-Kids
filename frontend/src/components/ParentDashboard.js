@@ -317,6 +317,17 @@ const ParentDashboard = () => {
                 </div>
                 <span className="text-white font-bold">{children.length}</span>
               </div>
+              {pendingTasks.length > 0 && (
+                <div className="relative">
+                  <div className="flex items-center space-x-2 bg-yellow-500 backdrop-blur-sm rounded-full px-4 py-2 animate-pulse">
+                    <AlertCircle className="w-5 h-5 text-white" />
+                    <span className="text-white font-bold">{pendingTasks.length}</span>
+                  </div>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-bounce">
+                    !
+                  </span>
+                </div>
+              )}
               <Button 
                 variant="ghost" 
                 onClick={logout} 
