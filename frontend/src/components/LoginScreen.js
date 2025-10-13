@@ -189,9 +189,9 @@ const LoginScreen = () => {
                     {isLoading ? 'Entrando...' : 'Entrar'}
                   </Button>
 
-                  {/* Forgot Password Link - Only for parents */}
-                  {userType === 'parent' && (
-                    <div className="text-center mt-3">
+                  {/* Recovery Links */}
+                  <div className="text-center mt-3">
+                    {userType === 'parent' ? (
                       <button
                         type="button"
                         onClick={() => setShowPasswordReset(true)}
@@ -200,8 +200,17 @@ const LoginScreen = () => {
                       >
                         Esqueci minha senha
                       </button>
-                    </div>
-                  )}
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowPinReset(true)}
+                        className="text-sm text-purple-600 hover:text-purple-800 hover:underline transition-colors font-nunito"
+                        data-testid="forgot-pin-link"
+                      >
+                        Esqueci meu PIN
+                      </button>
+                    )}
+                  </div>
                 </form>
               </TabsContent>
               
