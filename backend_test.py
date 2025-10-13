@@ -542,11 +542,12 @@ class MissionKidsAPITester:
             verify_response = self.make_request('GET', f'savings-goals/{self.child_id}', token=self.parent_token)
             if verify_response and verify_response.status_code == 200:
                 remaining_goals = verify_response.json()
-                if len(remaining_goals) == 2:
+                expected_remaining = expected_goals - 1
+                if len(remaining_goals) == expected_remaining:
                     self.log_test("Savings Goals Management", True)
                     return True
                 else:
-                    self.log_test("Savings Goals Management", False, f"Expected 2 goals after deletion, got {len(remaining_goals)}")
+                    self.log_test("Savings Goals Management", False, f"Expected {expected_remaining} goals after deletion, got {len(remaining_goals)}")
             else:
                 self.log_test("Savings Goals Management", False, "Failed to verify goal deletion")
         
