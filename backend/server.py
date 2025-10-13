@@ -436,6 +436,61 @@ async def get_tasks(current_user: dict = Depends(get_current_user)):
     
     return tasks
 
+@api_router.put("/tasks/{task_id}")
+async def update_task(task_id: str, task_data: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can update tasks")
+    
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Verify parent owns this child
+    child = await db.users.find_one({"id": task["child_id"]}, {"_id": 0})
+    if not child or child.get("parent_id") != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Update fields
+    update_fields = {}
+    if "title" in task_data:
+        update_fields["title"] = task_data["title"]
+    if "description" in task_data:
+        update_fields["description"] = task_data["description"]
+    if "value" in task_data:
+        update_fields["value"] = float(task_data["value"])
+    if "xp" in task_data:
+        update_fields["xp"] = int(task_data["xp"])
+    if "frequency" in task_data:
+        update_fields["frequency"] = task_data["frequency"]
+    if "photo_required" in task_data:
+        update_fields["photo_required"] = task_data["photo_required"]
+    if "approval_required" in task_data:
+        update_fields["approval_required"] = task_data["approval_required"]
+    
+    if update_fields:
+        await db.tasks.update_one({"id": task_id}, {"$set": update_fields})
+    
+    return {"success": True, "message": "Tarefa atualizada com sucesso"}
+
+@api_router.delete("/tasks/{task_id}")
+async def delete_task(task_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can delete tasks")
+    
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Verify parent owns this child
+    child = await db.users.find_one({"id": task["child_id"]}, {"_id": 0})
+    if not child or child.get("parent_id") != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    await db.tasks.delete_one({"id": task_id})
+    
+    return {"success": True, "message": "Tarefa deletada com sucesso"}
+
+
 @api_router.post("/tasks/{task_id}/complete")
 async def complete_task(task_id: str, current_user: dict = Depends(get_current_user)):
     task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
