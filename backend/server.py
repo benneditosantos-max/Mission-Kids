@@ -364,6 +364,45 @@ async def update_avatar(request: dict, current_user: dict = Depends(get_current_
     )
     return {"success": True}
 
+@api_router.get("/children/{child_id}/financial")
+async def get_child_financial_data(child_id: str, current_user: dict = Depends(get_current_user)):
+    # Verify access - parents can access their children's data, children can access their own
+    child = await db.users.find_one({"id": child_id}, {"_id": 0})
+    if not child:
+        raise HTTPException(status_code=404, detail="Child not found")
+    
+    if current_user["role"] == "parent":
+        if child.get("parent_id") != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Not authorized")
+    elif current_user["role"] == "child":
+        if current_user["id"] != child_id:
+            raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Get savings goals
+    savings_goals = await db.savings_goals.find({"child_id": child_id}, {"_id": 0}).to_list(3)
+    
+    # Get recent transactions
+    transactions = await db.transactions.find({"child_id": child_id}, {"_id": 0}).sort("created_at", -1).to_list(10)
+    
+    # Calculate XP progress to next level
+    current_xp = child.get("xp", 0)
+    current_level = child.get("level", 1)
+    xp_for_next_level = current_level * 100
+    xp_progress = current_xp % 100
+    
+    return {
+        "balance": child.get("earned", 0.0),
+        "total_allowance": child.get("total_allowance", 0.0),
+        "allowance_goal": child.get("allowance_goal", 50.0),
+        "xp": current_xp,
+        "level": current_level,
+        "xp_progress": xp_progress,
+        "xp_for_next_level": xp_for_next_level,
+        "avatar": child.get("avatar", "hero1"),
+        "savings_goals": savings_goals,
+        "recent_transactions": transactions
+    }
+
 # Task routes
 @api_router.post("/tasks", response_model=Task)
 async def create_task(task_data: TaskCreate, current_user: dict = Depends(get_current_user)):
