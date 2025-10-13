@@ -28,10 +28,9 @@ const PasswordReset = ({ onBack }) => {
     setIsLoading(true);
     try {
       // First, verify if user exists and name matches
-      const response = await axios.post('/auth/reset-password', {
+      const response = await axios.post('/auth/verify-identity', {
         email: resetForm.email,
-        name: resetForm.name,
-        new_password: 'temp_password_for_verification'
+        name: resetForm.name
       });
       
       // If we reach here without error, proceed to step 2
