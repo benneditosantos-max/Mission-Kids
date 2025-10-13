@@ -46,7 +46,7 @@ function AppContent() {
   }
 
   if (!user) {
-    return <ModernLoginScreen />;
+    return <LoginScreen />;
   }
 
   return (
@@ -55,8 +55,8 @@ function AppContent() {
         path="/" 
         element={
           user.role === 'child' ? 
-            <ModernChildDashboard /> : 
-            <ModernParentDashboard />
+            <ChildDashboard /> : 
+            <ParentDashboard />
         } 
       />
       <Route path="*" element={<Navigate to="/" replace />} />
