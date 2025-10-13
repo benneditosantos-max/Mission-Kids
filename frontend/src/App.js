@@ -94,22 +94,66 @@ function VersionSelector() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        {/* Logo and Welcome */}
-        <div className="text-center mb-8">
-          <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 shadow-lg animate-bounce-in">
-            <Shield className="w-10 h-10 text-indigo-600" />
+    <div className="min-h-screen bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        {/* Main Card Container */}
+        <div className="bg-white rounded-3xl p-8 shadow-2xl">
+          {/* Logo and Welcome */}
+          <div className="text-center mb-8">
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold font-nunito text-gray-800 mb-2">
+              Mission<span className="text-blue-600">Kids</span>
+            </h1>
+            
+            {/* Character Illustrations */}
+            <div className="grid grid-cols-2 gap-4 my-8">
+              {/* Child Character */}
+              <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 text-center">
+                <div className="text-6xl mb-2">👦</div>
+                <p className="text-sm font-semibold text-gray-700">Criança</p>
+              </div>
+              
+              {/* Parent Character */}
+              <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-6 text-center">
+                <div className="text-6xl mb-2">👨‍👩‍👧</div>
+                <p className="text-sm font-semibold text-gray-700">Pais</p>
+              </div>
+            </div>
+            
+            {/* Enter Button */}
+            <Button 
+              onClick={() => setSelectedVersion('mongodb')}
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-2xl text-lg shadow-lg transform transition-all duration-200 hover:scale-105 mb-6"
+            >
+              Entrar
+            </Button>
+            
+            {/* User Profile Preview */}
+            <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">👤</span>
+              </div>
+              <span className="font-medium">Carrana</span>
+            </div>
           </div>
-          <h1 className="text-4xl font-bold font-nunito text-gray-800 mb-2">
-            Mission<span className="text-indigo-600">Kids</span>
-          </h1>
-          <p className="text-gray-600 font-nunito mb-4">
-            Escolha a versão do seu Gestor Familiar! 🎯
-          </p>
-          <Badge className="bg-yellow-100 text-yellow-800">
-            🚀 Duas versões disponíveis
-          </Badge>
+        </div>
+        
+        {/* Version Selection Cards - Compact */}
+        <div className="mt-6 grid grid-cols-1 gap-3">
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur border-0"
+            onClick={() => setSelectedVersion('firebase')}
+          >
+            <CardContent className="p-4 text-center">
+              <div className="flex items-center justify-center space-x-3">
+                <Flame className="w-5 h-5 text-orange-500" />
+                <span className="text-sm font-semibold text-gray-700">Firebase Edition</span>
+                <Badge className="bg-orange-100 text-orange-600 text-xs">Novo</Badge>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
