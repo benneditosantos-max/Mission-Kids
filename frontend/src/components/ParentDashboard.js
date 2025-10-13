@@ -18,7 +18,7 @@ import {
 import axios from 'axios';
 import { toast } from 'sonner';
 
-const ModernParentDashboard = () => {
+const ParentDashboard = () => {
   const { user, logout, playSound } = useAuth();
   const [children, setChildren] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -349,46 +349,47 @@ const ModernParentDashboard = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {children.map((child) => (
-                <div key={child.id} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="text-4xl">{child.avatar}</div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-800">{child.name}</h3>
-                      <p className="text-sm text-gray-600">{child.age} anos</p>
+                  <div key={child.id} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className="text-4xl">👶</div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-800">{child.name}</h3>
+                        <p className="text-sm text-gray-600">{child.email}</p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">{child.level}</div>
-                      <div className="text-xs text-gray-600">Nível</div>
+                    
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">{child.level}</div>
+                        <div className="text-xs text-gray-600">Nível</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-yellow-600">{child.xp}</div>
+                        <div className="text-xs text-gray-600">XP</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">R$ {child.earned.toFixed(2)}</div>
+                        <div className="text-xs text-gray-600">Ganho</div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600">{child.xp}</div>
-                      <div className="text-xs text-gray-600">XP</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">R$ {child.earned.toFixed(2)}</div>
-                      <div className="text-xs text-gray-600">Ganho</div>
-                    </div>
-                  </div>
 
-                  <div className="bg-white rounded-xl p-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700">Progresso da Mesada</span>
-                      <span className="text-sm text-gray-600">{((child.earned / child.allowance_goal) * 100).toFixed(0)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(child.earned / child.allowance_goal) * 100}%` }}
-                      ></div>
-                    </div>
+                    <div className="bg-white rounded-xl p-3">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700">Progresso da Mesada</span>
+                        <span className="text-sm text-gray-600">{((child.earned / child.allowance_goal) * 100).toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min((child.earned / child.allowance_goal) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+          </div>
 
           {/* Tasks Section */}
           <div className="mb-8">
@@ -422,7 +423,7 @@ const ModernParentDashboard = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {children.map((child) => (
-                            <SelectItem key={child.id} value={child.id.toString()}>
+                            <SelectItem key={child.id} value={child.id}>
                               {child.name}
                             </SelectItem>
                           ))}
@@ -485,43 +486,54 @@ const ModernParentDashboard = () => {
             </div>
 
             <div className="space-y-4">
-              {tasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all duration-300"
-                  data-testid={`task-card-${task.id}`}
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTaskStatusColor(task.status)}`}>
-                      {task.status === 'approved' ? (
-                        <CheckCircle className="w-5 h-5" />
-                      ) : task.status === 'completed' ? (
-                        <Clock className="w-5 h-5" />
-                      ) : (
-                        <Star className="w-5 h-5" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800">{task.title}</h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span>Para: {task.child_name}</span>
-                        <span className="flex items-center">
-                          <DollarSign className="w-3 h-3 mr-1 text-green-500" />
-                          R$ {task.value.toFixed(2)}
-                        </span>
-                        <span className="flex items-center">
-                          <Star className="w-3 h-3 mr-1 text-purple-500" />
-                          {task.xp} XP
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <Badge className={`${getTaskStatusColor(task.status)} rounded-xl px-3 py-1`}>
-                    {getTaskStatusText(task.status)}
-                  </Badge>
+              {tasks.length === 0 ? (
+                <div className="bg-gray-50 rounded-2xl p-8 text-center">
+                  <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-gray-600 mb-2">Nenhuma tarefa criada</h3>
+                  <p className="text-gray-500">Crie a primeira tarefa para seus filhos!</p>
                 </div>
-              ))}
+              ) : (
+                tasks.map((task) => {
+                  const child = children.find(c => c.id === task.child_id);
+                  return (
+                    <div 
+                      key={task.id} 
+                      className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all duration-300"
+                      data-testid={`task-card-${task.id}`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTaskStatusColor(task.status)}`}>
+                          {task.status === 'approved' ? (
+                            <CheckCircle className="w-5 h-5" />
+                          ) : task.status === 'completed' ? (
+                            <Clock className="w-5 h-5" />
+                          ) : (
+                            <Star className="w-5 h-5" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-800">{task.title}</h3>
+                          <div className="flex items-center space-x-4 text-sm text-gray-600">
+                            <span>Para: {child?.name || 'Criança'}</span>
+                            <span className="flex items-center">
+                              <DollarSign className="w-3 h-3 mr-1 text-green-500" />
+                              R$ {task.value.toFixed(2)}
+                            </span>
+                            <span className="flex items-center">
+                              <Star className="w-3 h-3 mr-1 text-purple-500" />
+                              {task.xp} XP
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Badge className={`${getTaskStatusColor(task.status)} rounded-xl px-3 py-1`}>
+                        {getTaskStatusText(task.status)}
+                      </Badge>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -557,4 +569,4 @@ const ModernParentDashboard = () => {
   );
 };
 
-export default ModernParentDashboard;
+export default ParentDashboard;
