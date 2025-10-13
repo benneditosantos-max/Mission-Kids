@@ -53,7 +53,9 @@ class TaskStatus(str, Enum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
+    AWAITING_VALIDATION = "awaiting_validation"
     APPROVED = "approved"
+    REJECTED = "rejected"
 
 # Models
 class User(BaseModel):
