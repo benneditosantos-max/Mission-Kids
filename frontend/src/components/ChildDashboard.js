@@ -18,13 +18,7 @@ const ModernChildDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [savingsGoals, setSavingsGoals] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Mock tasks for demo - replace with real API calls
-  const mockTasks = [
-    { id: 1, title: "Arrumar a cama", value: 5.0, xp: 10, status: "pending" },
-    { id: 2, title: "Lavar a louça", value: 8.0, xp: 15, status: "pending" },
-    { id: 3, title: "Estudar matemática", value: 10.0, xp: 20, status: "completed" }
-  ];
+  const [financialData, setFinancialData] = useState(null);
 
   const weeklyData = [
     { day: "Dom", completed: 2 },
@@ -36,13 +30,32 @@ const ModernChildDashboard = () => {
     { day: "Sáb", completed: 3 }
   ];
 
-  useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setTasks(mockTasks);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch tasks
+      const tasksResponse = await axios.get('/tasks');
+      setTasks(tasksResponse.data || []);
+      
+      // Fetch financial data
+      const financialResponse = await axios.get(`/children/${user.id}/financial`);
+      setFinancialData(financialResponse.data);
+      setSavingsGoals(financialResponse.data.savings_goals || []);
+      
       setLoading(false);
-    }, 1000);
-  }, []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Erro ao carregar dados');
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchData();
+    }
+  }, [user]);
 
   const handleCompleteTask = async (taskId) => {
     try {
