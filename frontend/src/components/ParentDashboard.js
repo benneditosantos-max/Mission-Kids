@@ -519,7 +519,6 @@ const ParentDashboard = () => {
                 })
               )}
             </div>
-          )}
           </TabsContent>
 
           {/* Tasks Tab */}
