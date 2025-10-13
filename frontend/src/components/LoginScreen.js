@@ -34,6 +34,11 @@ const LoginScreen = () => {
 
   const [userType, setUserType] = useState('parent');
 
+  // If password reset is shown, render it
+  if (showPasswordReset) {
+    return <PasswordReset onBack={() => setShowPasswordReset(false)} />;
+  }
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
