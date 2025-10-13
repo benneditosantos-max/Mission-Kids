@@ -571,6 +571,42 @@ async def approve_task(task_id: str, current_user: dict = Depends(get_current_us
     )
     
     return {"success": True, "message": "Tarefa aprovada e creditada com sucesso!"}
+
+@api_router.post("/tasks/{task_id}/reject")
+async def reject_task(task_id: str, reason: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can reject tasks")
+    
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Task must be awaiting validation
+    if task["status"] != TaskStatus.AWAITING_VALIDATION.value:
+        raise HTTPException(status_code=400, detail="Task is not awaiting validation")
+    
+    # Verify parent owns this child
+    child = await db.users.find_one({"id": task["child_id"]}, {"_id": 0})
+    if not child or child.get("parent_id") != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Reject task (set back to pending)
+    await db.tasks.update_one(
+        {"id": task_id},
+        {"$set": {
+            "status": TaskStatus.PENDING.value,
+            "completed_at": None,
+            "rejection_reason": reason.get("reason", "Não aprovado pelos pais")
+        }}
+    )
+    
+    # Mark notification as read
+    await db.notifications.update_many(
+        {"task_id": task_id, "parent_id": current_user["id"]},
+        {"$set": {"read": True}}
+    )
+    
+    return {"success": True, "message": "Tarefa rejeitada. Status voltou para pendente."}
     transaction = Transaction(
         child_id=task["child_id"],
         task_id=task_id,
