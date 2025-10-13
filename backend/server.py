@@ -224,6 +224,28 @@ async def login(login_data: UserLogin):
     token = create_access_token({"user_id": user["id"], "role": user["role"]})
     return {"token": token, "user": user_response}
 
+@api_router.post("/auth/reset-password")
+async def reset_password(reset_data: PasswordReset):
+    # Find user by email
+    user = await db.users.find_one({"email": reset_data.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Email não encontrado")
+    
+    # Verify name matches (security check)
+    if user["name"].lower() != reset_data.name.lower():
+        raise HTTPException(status_code=400, detail="Nome não confere com o email informado")
+    
+    # Hash new password
+    new_hashed_password = hash_password(reset_data.new_password)
+    
+    # Update password
+    await db.users.update_one(
+        {"email": reset_data.email},
+        {"$set": {"password": new_hashed_password}}
+    )
+    
+    return {"message": "Senha redefinida com sucesso!"}
+
 # User routes
 @api_router.get("/users/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
