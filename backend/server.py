@@ -586,6 +586,40 @@ async def get_savings_goals(child_id: str, current_user: dict = Depends(get_curr
     goals = await db.savings_goals.find({"child_id": child_id}, {"_id": 0}).to_list(100)
     return goals
 
+@api_router.put("/savings-goals/{goal_id}")
+async def update_savings_goal(goal_id: str, goal_data: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can update savings goals")
+    
+    goal = await db.savings_goals.find_one({"id": goal_id}, {"_id": 0})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    # Update goal
+    update_fields = {}
+    if "name" in goal_data:
+        update_fields["name"] = goal_data["name"]
+    if "target" in goal_data:
+        update_fields["target"] = goal_data["target"]
+    
+    if update_fields:
+        await db.savings_goals.update_one({"id": goal_id}, {"$set": update_fields})
+    
+    return {"success": True}
+
+@api_router.delete("/savings-goals/{goal_id}")
+async def delete_savings_goal(goal_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can delete savings goals")
+    
+    goal = await db.savings_goals.find_one({"id": goal_id}, {"_id": 0})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    await db.savings_goals.delete_one({"id": goal_id})
+    
+    return {"success": True}
+
 @api_router.post("/savings-goals/{goal_id}/deposit")
 async def deposit_to_goal(goal_id: str, amount: float, current_user: dict = Depends(get_current_user)):
     goal = await db.savings_goals.find_one({"id": goal_id}, {"_id": 0})
