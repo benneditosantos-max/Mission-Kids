@@ -18,6 +18,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 // Import Modern Design components
 import ModernLoginScreen from '@/components/ModernLoginScreen';
 import ModernChildDashboard from '@/components/ModernChildDashboard';
+import ModernParentDashboard from '@/components/ModernParentDashboard';
 
 // Import Firebase version
 import FirebaseApp from '@/components/FirebaseApp';
