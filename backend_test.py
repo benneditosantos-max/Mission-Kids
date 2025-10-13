@@ -93,32 +93,38 @@ class MissionKidsAPITester:
         return False
 
     def test_child_registration(self):
-        """Test child user registration"""
-        if not self.parent_id:
-            self.log_test("Child Registration", False, "No parent ID available")
+        """Test child user registration via POST /api/children"""
+        if not self.parent_token:
+            self.log_test("Child Registration", False, "No parent token available")
             return False
             
         test_email = f"child_{uuid.uuid4().hex[:8]}@test.com"
         data = {
             "email": test_email,
             "name": "Test Child",
-            "password": "ChildPass123!",
-            "role": "child",
             "pin": "1234",
-            "parent_id": self.parent_id
+            "avatar": "hero1",
+            "allowance_goal": 50.0
         }
         
-        response = self.make_request('POST', 'auth/register', data)
+        response = self.make_request('POST', 'children', data, token=self.parent_token)
         
         if response and response.status_code == 200:
             result = response.json()
-            if 'token' in result and 'user' in result:
-                self.child_token = result['token']
-                self.child_id = result['user']['id']
-                self.log_test("Child Registration", True)
-                return True
+            if 'success' in result and 'child' in result:
+                child_data = result['child']
+                self.child_id = child_data['id']
+                # Verify initial financial values
+                if (child_data.get('earned', 0) == 0.0 and 
+                    child_data.get('total_allowance', 0) == 0.0 and
+                    child_data.get('xp', 0) == 0 and
+                    child_data.get('level', 1) == 1):
+                    self.log_test("Child Registration", True)
+                    return True
+                else:
+                    self.log_test("Child Registration", False, "Initial financial values incorrect")
             else:
-                self.log_test("Child Registration", False, "Missing token or user in response")
+                self.log_test("Child Registration", False, "Missing success or child in response")
         else:
             error_msg = response.json().get('detail', 'Unknown error') if response else 'No response'
             self.log_test("Child Registration", False, f"Status: {response.status_code if response else 'None'}, Error: {error_msg}")
