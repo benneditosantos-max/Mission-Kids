@@ -224,9 +224,131 @@ const ModernParentDashboard = () => {
           
           {/* Children Overview */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold font-nunito text-gray-800 mb-6">Seus Filhos</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {children.map((child) => (
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold font-nunito text-gray-800">Seus Filhos</h2>
+              <Dialog open={showCreateChild} onOpenChange={setShowCreateChild}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl px-6 py-3 font-bold shadow-lg"
+                    data-testid="add-child-btn"
+                  >
+                    <Baby className="w-5 h-5 mr-2" />
+                    Adicionar Filho(a)
+                  </Button>
+                </DialogTrigger>
+                
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="font-nunito">Cadastrar Nova Criança</DialogTitle>
+                    <DialogDescription>
+                      Crie uma conta segura para seu filho(a)
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <form onSubmit={handleCreateChild} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Nome Completo</Label>
+                      <Input
+                        placeholder="Ex: João Silva"
+                        value={childForm.name}
+                        onChange={(e) => setChildForm(prev => ({ ...prev, name: e.target.value }))}
+                        required
+                        className="rounded-xl"
+                        data-testid="child-name-input"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Idade</Label>
+                      <Input
+                        type="number"
+                        min="5"
+                        max="18"
+                        placeholder="13"
+                        value={childForm.age}
+                        onChange={(e) => setChildForm(prev => ({ ...prev, age: e.target.value }))}
+                        required
+                        className="rounded-xl"
+                        data-testid="child-age-input"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="joao@email.com"
+                        value={childForm.email}
+                        onChange={(e) => setChildForm(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                        className="rounded-xl"
+                        data-testid="child-email-input"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>PIN (4 dígitos)</Label>
+                      <Input
+                        type="password"
+                        placeholder="1234"
+                        maxLength={4}
+                        value={childForm.pin}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          setChildForm(prev => ({ ...prev, pin: value }));
+                        }}
+                        required
+                        className="rounded-xl text-center text-2xl tracking-widest font-mono"
+                        data-testid="child-pin-input"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Meta de Mesada (R$)</Label>
+                      <Input
+                        type="number"
+                        min="10"
+                        step="5"
+                        placeholder="50"
+                        value={childForm.allowance_goal}
+                        onChange={(e) => setChildForm(prev => ({ ...prev, allowance_goal: e.target.value }))}
+                        required
+                        className="rounded-xl"
+                        data-testid="child-allowance-input"
+                      />
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl font-bold" 
+                        data-testid="create-child-submit"
+                      >
+                        <Baby className="w-4 h-4 mr-2" />
+                        Cadastrar Criança
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+            
+            {children.length === 0 ? (
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 text-center">
+                <Baby className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-gray-600 mb-2">Nenhuma criança cadastrada</h3>
+                <p className="text-gray-500 mb-4">Adicione seus filhos para começar a diversão!</p>
+                <Button 
+                  onClick={() => setShowCreateChild(true)}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl px-6 py-3 font-bold"
+                >
+                  <Baby className="w-4 h-4 mr-2" />
+                  Adicionar Primeiro Filho(a)
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {children.map((child) => (
                 <div key={child.id} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6">
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="text-4xl">{child.avatar}</div>
