@@ -788,6 +788,33 @@ async def pay_allowance(request: dict, current_user: dict = Depends(get_current_
     
     return {"success": True, "amount_paid": paid_amount}
 
+# Notifications endpoints
+@api_router.get("/notifications")
+async def get_notifications(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can view notifications")
+    
+    notifications = await db.notifications.find(
+        {"parent_id": current_user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    return notifications
+
+@api_router.post("/notifications/mark-read")
+async def mark_notifications_read(notification_ids: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can mark notifications")
+    
+    ids = notification_ids.get("ids", [])
+    if ids:
+        await db.notifications.update_many(
+            {"id": {"$in": ids}, "parent_id": current_user["id"]},
+            {"$set": {"read": True}}
+        )
+    
+    return {"success": True}
+
 # Include the router in the main app
 app.include_router(api_router)
 
