@@ -433,10 +433,18 @@ const ParentDashboard = () => {
                   <div key={child.id} className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6">
                     <div className="flex items-center space-x-4 mb-4">
                       <div className="text-4xl">👶</div>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="text-lg font-bold text-gray-800">{child.name}</h3>
                         <p className="text-sm text-gray-600">{child.email}</p>
                       </div>
+                      <Button
+                        size="sm"
+                        onClick={() => openGoalDialog(child.id)}
+                        className="bg-purple-500 hover:bg-purple-600 text-white rounded-xl"
+                        title="Adicionar Meta"
+                      >
+                        <Target className="w-4 h-4" />
+                      </Button>
                     </div>
                     
                     <div className="grid grid-cols-3 gap-4 mb-4">
@@ -454,7 +462,7 @@ const ParentDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-xl p-3">
+                    <div className="bg-white rounded-xl p-3 mb-3">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-medium text-gray-700">Progresso da Mesada</span>
                         <span className="text-sm text-gray-600">{((child.earned / child.allowance_goal) * 100).toFixed(0)}%</span>
@@ -466,6 +474,38 @@ const ParentDashboard = () => {
                         ></div>
                       </div>
                     </div>
+
+                    {/* Savings Goals */}
+                    {savingsGoals[child.id] && savingsGoals[child.id].length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-semibold text-gray-700 mb-2">Metas de Poupança:</div>
+                        {savingsGoals[child.id].map((goal) => (
+                          <div key={goal.id} className="bg-white rounded-lg p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-700">{goal.name}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteGoal(goal.id)}
+                                className="h-6 w-6 p-0 hover:bg-red-100"
+                              >
+                                <Trash2 className="w-3 h-3 text-red-500" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                              <span>R$ {goal.progress.toFixed(2)} / R$ {goal.target.toFixed(2)}</span>
+                              <span className="font-bold text-purple-600">{Math.floor((goal.progress / goal.target) * 100)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1">
+                              <div 
+                                className="bg-gradient-to-r from-purple-400 to-pink-400 h-1 rounded-full"
+                                style={{ width: `${Math.min((goal.progress / goal.target) * 100, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
