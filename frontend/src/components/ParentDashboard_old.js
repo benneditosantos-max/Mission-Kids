@@ -516,9 +516,9 @@ const ParentDashboard = () => {
                       </CardContent>
                     </Card>
                   );
-                })}
-              </div>
-            )}
+                })
+              )}
+            </div>
           </TabsContent>
 
           {/* Tasks Tab */}
