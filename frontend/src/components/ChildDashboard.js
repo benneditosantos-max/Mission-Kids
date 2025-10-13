@@ -72,11 +72,14 @@ const ModernChildDashboard = () => {
     }
   };
 
-  const currentLevel = user?.level || 1;
-  const currentXp = user?.xp || 150;
-  const xpForNextLevel = currentLevel * 100;
-  const xpProgress = ((currentXp % 100) / 100) * 100;
-  const balance = user?.earned || 42.50;
+  const currentLevel = financialData?.level || user?.level || 1;
+  const currentXp = financialData?.xp || user?.xp || 0;
+  const xpProgress = financialData?.xp_progress || 0;
+  const xpForNextLevel = financialData?.xp_for_next_level || 100;
+  const balance = financialData?.balance || user?.earned || 0;
+  const totalAllowance = financialData?.total_allowance || 0;
+  const allowanceGoal = financialData?.allowance_goal || user?.allowance_goal || 50;
+  const allowanceProgress = (balance / allowanceGoal) * 100;
 
   if (loading) {
     return (
