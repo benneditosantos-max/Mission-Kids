@@ -63,6 +63,7 @@ class User(BaseModel):
     email: str
     name: str
     role: UserRole
+    password: Optional[str] = None  # For parents
     pin: Optional[str] = None  # For children
     parent_id: Optional[str] = None  # For children
     xp: int = 0
