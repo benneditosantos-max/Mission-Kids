@@ -91,6 +91,11 @@ class PasswordReset(BaseModel):
     name: str
     new_password: str
 
+class PinReset(BaseModel):
+    email: str
+    name: str
+    new_pin: str
+
 class Task(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
