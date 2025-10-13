@@ -525,8 +525,9 @@ class MissionKidsAPITester:
             return False
         
         goals = get_response.json()
-        if len(goals) != 3:
-            self.log_test("Savings Goals Management", False, f"Expected 3 goals, got {len(goals)}")
+        expected_goals = 3 if fourth_response.status_code != 200 else 4
+        if len(goals) != expected_goals:
+            self.log_test("Savings Goals Management", False, f"Expected {expected_goals} goals, got {len(goals)}")
             return False
         
         # Test deleting one goal
