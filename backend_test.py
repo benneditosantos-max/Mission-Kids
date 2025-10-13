@@ -663,43 +663,74 @@ class MissionKidsAPITester:
 
     def run_all_tests(self):
         """Run all API tests"""
-        print("🚀 Starting MissionKids API Tests...")
-        print("=" * 50)
+        print("🚀 Starting MissionKids Financial System API Tests...")
+        print("=" * 60)
         
         # Authentication tests
         print("\n📝 Authentication Tests:")
-        self.test_parent_registration()
-        self.test_child_registration()
-        self.test_parent_login()
-        self.test_child_login()
+        if not self.test_parent_registration():
+            print("❌ Cannot continue without parent registration")
+            return False
+        
+        if not self.test_parent_login():
+            print("❌ Parent login failed")
+            return False
+        
+        # Child registration tests (NEW)
+        print("\n👶 Child Registration Tests:")
+        if not self.test_register_multiple_children():
+            print("❌ Cannot continue without child registration")
+            return False
+        
+        if not self.test_child_login():
+            print("❌ Child login failed")
+            return False
         
         # User management tests
         print("\n👤 User Management Tests:")
         self.test_get_current_user()
         self.test_get_children()
-        self.test_update_avatar()
         
-        # Task management tests
-        print("\n🎯 Task Management Tests:")
-        self.test_create_task()
+        # Task management and financial tests
+        print("\n🎯 Task Management & Financial Tests:")
+        if not self.test_create_multiple_tasks():
+            print("❌ Cannot test financial updates without tasks")
+            return False
+        
         self.test_get_tasks()
-        self.test_complete_task()
-        self.test_approve_task()
         
-        # Financial tests
-        print("\n💰 Financial Tests:")
-        self.test_create_savings_goal()
-        self.test_get_savings_goals()
+        if not self.test_complete_tasks_and_verify_financials():
+            print("❌ Financial system verification failed")
+            return False
+        
+        # Financial data endpoint test (NEW)
+        print("\n💰 Financial Data Tests:")
+        self.test_financial_data_endpoint()
+        
+        # Savings goals management tests (NEW)
+        print("\n🎯 Savings Goals Management Tests:")
+        self.test_savings_goals_management()
+        
+        # Additional tests
+        print("\n📊 Additional Tests:")
         self.test_get_transactions()
         self.test_pay_allowance()
+        self.test_update_avatar()
         
         # Print summary
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         print(f"📊 Test Summary:")
         print(f"Total tests: {self.tests_run}")
         print(f"Passed: {self.tests_passed}")
         print(f"Failed: {self.tests_run - self.tests_passed}")
         print(f"Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        # Print failed tests details
+        failed_tests = [test for test in self.test_results if not test['success']]
+        if failed_tests:
+            print(f"\n❌ Failed Tests Details:")
+            for test in failed_tests:
+                print(f"  • {test['test']}: {test['details']}")
         
         return self.tests_passed == self.tests_run
 
