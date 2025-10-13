@@ -686,6 +686,55 @@ const ParentDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Savings Goal Dialog */}
+      <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-nunito">Criar Meta de Poupança</DialogTitle>
+            <DialogDescription>
+              Crie até 3 metas de poupança por criança
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleCreateGoal} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome da Meta</Label>
+              <Input
+                placeholder="Ex: Bicicleta nova"
+                value={goalForm.name}
+                onChange={(e) => setGoalForm(prev => ({ ...prev, name: e.target.value }))}
+                required
+                className="rounded-xl"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Valor Alvo (R$)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="1"
+                placeholder="100.00"
+                value={goalForm.target}
+                onChange={(e) => setGoalForm(prev => ({ ...prev, target: e.target.value }))}
+                required
+                className="rounded-xl"
+              />
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl font-bold"
+              >
+                <Target className="w-4 h-4 mr-2" />
+                Criar Meta
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
