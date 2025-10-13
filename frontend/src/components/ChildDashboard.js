@@ -227,6 +227,37 @@ const ModernChildDashboard = () => {
             )}
           </div>
 
+          {/* Savings Goals Section */}
+          {savingsGoals.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-bold font-nunito text-gray-800 mb-4">Minhas Metas de Poupança</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {savingsGoals.map((goal) => (
+                  <div key={goal.id} className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold text-gray-800">{goal.name}</h3>
+                      <Target className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="mb-2">
+                      <Progress 
+                        value={(goal.progress / goal.target) * 100} 
+                        className="h-2 bg-purple-200"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">
+                        R$ {goal.progress.toFixed(2)} / R$ {goal.target.toFixed(2)}
+                      </span>
+                      <span className="font-bold text-purple-600">
+                        {Math.floor((goal.progress / goal.target) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Weekly Summary */}
           <div className="mb-8">
             <h2 className="text-xl font-bold font-nunito text-gray-800 mb-4">Resumo da semana</h2>
