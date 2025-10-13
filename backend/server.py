@@ -270,6 +270,33 @@ async def reset_password(reset_data: PasswordReset):
     
     return {"message": "Senha redefinida com sucesso!"}
 
+@api_router.post("/auth/reset-pin")
+async def reset_pin(reset_data: PinReset):
+    # Find user by email
+    user = await db.users.find_one({"email": reset_data.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Email não encontrado")
+    
+    # Check if it's a child account
+    if user["role"] != "child":
+        raise HTTPException(status_code=400, detail="Esta função é apenas para contas de crianças")
+    
+    # Verify name matches (security check)
+    if user["name"].lower() != reset_data.name.lower():
+        raise HTTPException(status_code=400, detail="Nome não confere com o email informado")
+    
+    # Validate PIN format (4 digits)
+    if not reset_data.new_pin.isdigit() or len(reset_data.new_pin) != 4:
+        raise HTTPException(status_code=400, detail="PIN deve ter exatamente 4 dígitos")
+    
+    # Update PIN
+    await db.users.update_one(
+        {"email": reset_data.email},
+        {"$set": {"pin": reset_data.new_pin}}
+    )
+    
+    return {"message": "PIN redefinido com sucesso!"}
+
 # User routes
 @api_router.get("/users/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
