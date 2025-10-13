@@ -280,6 +280,73 @@ const ParentDashboard = () => {
     }
   };
 
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+    setTaskForm({
+      title: task.title,
+      description: task.description || '',
+      child_id: task.child_id,
+      value: task.value,
+      xp: task.xp,
+      frequency: task.frequency,
+      photo_required: task.photo_required,
+      approval_required: task.approval_required
+    });
+    setShowEditTask(true);
+  };
+
+  const handleUpdateTask = async (e) => {
+    e.preventDefault();
+    
+    if (!taskForm.title || !taskForm.child_id) {
+      toast.error('Preencha todos os campos obrigatórios');
+      return;
+    }
+
+    try {
+      await axios.put(`/tasks/${editingTask.id}`, {
+        ...taskForm,
+        value: parseFloat(taskForm.value),
+        xp: parseInt(taskForm.xp)
+      });
+      
+      toast.success('Tarefa atualizada com sucesso! ✏️');
+      setShowEditTask(false);
+      setEditingTask(null);
+      
+      // Reset form
+      setTaskForm({
+        title: '',
+        description: '',
+        child_id: '',
+        value: 0,
+        xp: 0,
+        frequency: 'daily',
+        photo_required: false,
+        approval_required: true
+      });
+      
+      fetchData();
+      
+    } catch (error) {
+      toast.error('Erro ao atualizar tarefa');
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Deseja realmente excluir esta tarefa?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/tasks/${taskId}`);
+      toast.success('Tarefa excluída com sucesso!');
+      fetchData();
+    } catch (error) {
+      toast.error('Erro ao excluir tarefa');
+    }
+  };
+
   const getTaskStatusColor = (status) => {
     switch (status) {
       case 'approved': return 'bg-green-500 text-white';
