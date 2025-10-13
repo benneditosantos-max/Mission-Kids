@@ -178,6 +178,64 @@ const ParentDashboard = () => {
     }
   };
 
+  const handleCreateGoal = async (e) => {
+    e.preventDefault();
+    
+    if (!goalForm.name || !goalForm.target || !goalForm.child_id) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
+
+    // Check if child already has 3 goals
+    const childGoals = savingsGoals[goalForm.child_id] || [];
+    if (childGoals.length >= 3) {
+      toast.error('Cada criança pode ter no máximo 3 metas de poupança');
+      return;
+    }
+
+    try {
+      await axios.post('/savings-goals', {
+        child_id: goalForm.child_id,
+        name: goalForm.name,
+        target: parseFloat(goalForm.target)
+      });
+      
+      toast.success('Meta de poupança criada com sucesso! 🎯');
+      setShowGoalDialog(false);
+      
+      // Reset form
+      setGoalForm({
+        name: '',
+        target: 0,
+        child_id: ''
+      });
+      
+      fetchData();
+      
+    } catch (error) {
+      toast.error('Erro ao criar meta de poupança');
+    }
+  };
+
+  const handleDeleteGoal = async (goalId) => {
+    if (!window.confirm('Deseja realmente excluir esta meta?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/savings-goals/${goalId}`);
+      toast.success('Meta excluída com sucesso!');
+      fetchData();
+    } catch (error) {
+      toast.error('Erro ao excluir meta');
+    }
+  };
+
+  const openGoalDialog = (childId) => {
+    setGoalForm(prev => ({ ...prev, child_id: childId }));
+    setShowGoalDialog(true);
+  };
+
   const getTaskStatusColor = (status) => {
     switch (status) {
       case 'approved': return 'bg-green-500 text-white';
