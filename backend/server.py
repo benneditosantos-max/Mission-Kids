@@ -224,6 +224,25 @@ async def login(login_data: UserLogin):
     token = create_access_token({"user_id": user["id"], "role": user["role"]})
     return {"token": token, "user": user_response}
 
+@api_router.post("/auth/verify-identity")
+async def verify_identity(verification_data: dict):
+    email = verification_data.get("email")
+    name = verification_data.get("name")
+    
+    if not email or not name:
+        raise HTTPException(status_code=400, detail="Email and name are required")
+    
+    # Find user by email
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Email não encontrado")
+    
+    # Verify name matches (security check)
+    if user["name"].lower() != name.lower():
+        raise HTTPException(status_code=400, detail="Nome não confere com o email informado")
+    
+    return {"message": "Identidade verificada com sucesso!"}
+
 @api_router.post("/auth/reset-password")
 async def reset_password(reset_data: PasswordReset):
     # Find user by email
