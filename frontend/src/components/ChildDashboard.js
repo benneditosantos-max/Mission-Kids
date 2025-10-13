@@ -140,13 +140,17 @@ const ModernChildDashboard = () => {
           {/* Progress Banner */}
           <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-6 mb-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <h3 className="text-lg font-bold text-gray-800 mb-2">
-                  Você já ganhou 50 de 100! 🎯
+                  Você já ganhou R$ {balance.toFixed(2)} de R$ {allowanceGoal.toFixed(2)}! 🎯
                 </h3>
-                <Progress value={50} className="w-64 h-3 bg-yellow-200" />
+                <Progress value={Math.min(allowanceProgress, 100)} className="w-full h-3 bg-yellow-200" />
+                <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
+                  <span>Nível {currentLevel} - {xpProgress} / {xpForNextLevel} XP</span>
+                  <span className="font-bold text-blue-600">{Math.floor(allowanceProgress)}%</span>
+                </div>
               </div>
-              <div className="text-6xl">
+              <div className="text-6xl ml-4">
                 🏆
               </div>
             </div>
