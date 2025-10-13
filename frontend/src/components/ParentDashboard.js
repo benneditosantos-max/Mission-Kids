@@ -544,6 +544,83 @@ const ParentDashboard = () => {
             )}
           </div>
 
+          {/* Pending Tasks Awaiting Validation Section */}
+          {pendingTasks.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold font-nunito text-gray-800">
+                  ⏳ Tarefas Aguardando Validação
+                  <Badge className="ml-3 bg-yellow-500 text-white">{pendingTasks.length}</Badge>
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                {pendingTasks.map((task) => {
+                  const child = children.find(c => c.id === task.child_id);
+                  return (
+                    <div 
+                      key={task.id} 
+                      className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                              <Clock className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-gray-800 text-lg">{task.title}</h3>
+                              <p className="text-sm text-gray-600">
+                                Concluída por: <span className="font-semibold">{child?.name || 'Criança'}</span>
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {task.description && (
+                            <p className="text-sm text-gray-700 mb-3 ml-13">{task.description}</p>
+                          )}
+                          
+                          <div className="flex items-center space-x-4 ml-13">
+                            <div className="flex items-center space-x-1">
+                              <Coins className="w-4 h-4 text-green-600" />
+                              <span className="font-bold text-green-600">R$ {task.value.toFixed(2)}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Star className="w-4 h-4 text-purple-600" />
+                              <span className="font-bold text-purple-600">{task.xp} XP</span>
+                            </div>
+                            <Badge className="text-xs bg-blue-100 text-blue-700">
+                              {task.frequency === 'daily' ? '📅 Diária' : 
+                               task.frequency === 'weekly' ? '📆 Semanal' : '📋 Mensal'}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col space-y-2">
+                          <Button
+                            onClick={() => handleApproveTask(task.id)}
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-6 py-2 font-bold"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Aprovar e Creditar
+                          </Button>
+                          <Button
+                            onClick={() => handleRejectTask(task.id)}
+                            variant="outline"
+                            className="border-red-500 text-red-500 hover:bg-red-50 rounded-xl px-6 py-2 font-medium"
+                          >
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            Rejeitar
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Tasks Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
