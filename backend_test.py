@@ -547,26 +547,56 @@ class MissionKidsAPITester:
         
         return False
 
-    def test_get_savings_goals(self):
-        """Test getting savings goals"""
-        if not self.child_token or not self.child_id:
-            self.log_test("Get Savings Goals", False, "Missing child token or child ID")
+    def test_register_multiple_children(self):
+        """Test registering 2 children via POST /api/children"""
+        if not self.parent_token:
+            self.log_test("Register Multiple Children", False, "No parent token available")
             return False
+        
+        self.child_ids = []
+        children_data = [
+            {"name": "Ana Silva", "email": f"ana_{uuid.uuid4().hex[:8]}@test.com", "pin": "1234"},
+            {"name": "João Silva", "email": f"joao_{uuid.uuid4().hex[:8]}@test.com", "pin": "5678"}
+        ]
+        
+        for child_data in children_data:
+            response = self.make_request('POST', 'children', child_data, token=self.parent_token)
             
-        response = self.make_request('GET', f'savings-goals/{self.child_id}', token=self.child_token)
-        
-        if response and response.status_code == 200:
-            goals = response.json()
-            if isinstance(goals, list):
-                self.log_test("Get Savings Goals", True)
-                return True
+            if response and response.status_code == 200:
+                result = response.json()
+                if 'success' in result and 'child' in result:
+                    child = result['child']
+                    self.child_ids.append(child['id'])
+                    
+                    # Verify initial values for first child
+                    if not self.child_id:  # Set first child as primary
+                        self.child_id = child['id']
+                    
+                    # Verify parent_id linkage and initial financial values
+                    if (child.get('parent_id') != self.parent_id or
+                        child.get('earned', 0) != 0.0 or
+                        child.get('total_allowance', 0) != 0.0 or
+                        child.get('xp', 0) != 0 or
+                        child.get('level', 1) != 1):
+                        self.log_test("Register Multiple Children", False, 
+                                     f"Incorrect initial values for {child_data['name']}")
+                        return False
+                else:
+                    self.log_test("Register Multiple Children", False, 
+                                 f"Missing success or child in response for {child_data['name']}")
+                    return False
             else:
-                self.log_test("Get Savings Goals", False, "Response is not a list")
-        else:
-            error_msg = response.json().get('detail', 'Unknown error') if response else 'No response'
-            self.log_test("Get Savings Goals", False, f"Status: {response.status_code if response else 'None'}, Error: {error_msg}")
+                error_msg = response.json().get('detail', 'Unknown error') if response else 'No response'
+                self.log_test("Register Multiple Children", False, 
+                             f"Failed to register {child_data['name']}: {error_msg}")
+                return False
         
-        return False
+        if len(self.child_ids) == 2:
+            self.log_test("Register Multiple Children", True)
+            return True
+        else:
+            self.log_test("Register Multiple Children", False, f"Only registered {len(self.child_ids)} out of 2 children")
+            return False
 
     def test_get_transactions(self):
         """Test getting transactions"""
