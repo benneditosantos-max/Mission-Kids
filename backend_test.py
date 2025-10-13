@@ -7,7 +7,7 @@ from datetime import datetime
 import uuid
 
 class MissionKidsAPITester:
-    def __init__(self, base_url="https://famitasks-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://kidquest.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.parent_token = None
