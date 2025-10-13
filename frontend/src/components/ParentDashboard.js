@@ -30,6 +30,10 @@ const ParentDashboard = () => {
   const [savingsGoals, setSavingsGoals] = useState({});
   const [notifications, setNotifications] = useState([]);
   const [pendingTasks, setPendingTasks] = useState([]);
+  const [showEditTask, setShowEditTask] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [taskFilter, setTaskFilter] = useState('all');
+  const [filteredTasks, setFilteredTasks] = useState([]);
 
   // Child registration form
   const [childForm, setChildForm] = useState({
