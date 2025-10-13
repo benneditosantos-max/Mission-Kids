@@ -406,7 +406,7 @@ class MissionKidsAPITester:
             self.log_test("Pay Allowance", False, "Missing parent token or child ID")
             return False
             
-        response = self.make_request('POST', 'allowance/pay', token=self.parent_token, data={"child_id": self.child_id})
+        response = self.make_request('POST', 'allowance/pay', data={"child_id": self.child_id}, token=self.parent_token)
         
         if response and response.status_code == 200:
             result = response.json()
