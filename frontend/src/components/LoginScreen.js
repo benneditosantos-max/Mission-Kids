@@ -41,6 +41,11 @@ const LoginScreen = () => {
     return <PasswordReset onBack={() => setShowPasswordReset(false)} />;
   }
 
+  // If PIN reset is shown, render it
+  if (showPinReset) {
+    return <PinReset onBack={() => setShowPinReset(false)} />;
+  }
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
