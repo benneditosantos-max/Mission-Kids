@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, Star, Users, Trophy } from 'lucide-react';
 import PasswordReset from './PasswordReset';
+import PinReset from './PinReset';
 
 const LoginScreen = () => {
   const { login, register } = useAuth();
