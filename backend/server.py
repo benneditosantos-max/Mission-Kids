@@ -69,7 +69,8 @@ class User(BaseModel):
     level: int = 1
     avatar: str = "hero1"
     allowance_goal: float = 50.0
-    earned: float = 0.0
+    earned: float = 0.0  # Current balance available
+    total_allowance: float = 0.0  # Total accumulated allowance over time
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
