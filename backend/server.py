@@ -377,13 +377,14 @@ async def complete_task(task_id: str, current_user: dict = Depends(get_current_u
         update_data["status"] = TaskStatus.APPROVED.value
         update_data["approved_at"] = datetime.now(timezone.utc).isoformat()
         
-        # Update child's XP and earned amount
+        # Update child's XP, earned amount, and total allowance
         await db.users.update_one(
             {"id": task["child_id"]},
             {
                 "$inc": {
                     "xp": task["xp"],
-                    "earned": task["value"]
+                    "earned": task["value"],
+                    "total_allowance": task["value"]
                 }
             }
         )
