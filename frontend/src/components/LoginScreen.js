@@ -181,6 +181,20 @@ const LoginScreen = () => {
                   >
                     {isLoading ? 'Entrando...' : 'Entrar'}
                   </Button>
+
+                  {/* Forgot Password Link - Only for parents */}
+                  {userType === 'parent' && (
+                    <div className="text-center mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordReset(true)}
+                        className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline transition-colors font-nunito"
+                        data-testid="forgot-password-link"
+                      >
+                        Esqueci minha senha
+                      </button>
+                    </div>
+                  )}
                 </form>
               </TabsContent>
               
