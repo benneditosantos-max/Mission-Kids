@@ -70,6 +70,19 @@ const ParentDashboard = () => {
       
       setChildren(childrenRes.data);
       setTasks(tasksRes.data);
+      
+      // Fetch savings goals for each child
+      const goalsMap = {};
+      for (const child of childrenRes.data) {
+        try {
+          const goalsRes = await axios.get(`/savings-goals/${child.id}`);
+          goalsMap[child.id] = goalsRes.data || [];
+        } catch (error) {
+          goalsMap[child.id] = [];
+        }
+      }
+      setSavingsGoals(goalsMap);
+      
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Erro ao carregar dados');
