@@ -67,6 +67,14 @@ const ParentDashboard = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (taskFilter === 'all') {
+      setFilteredTasks(tasks);
+    } else {
+      setFilteredTasks(tasks.filter(task => task.frequency === taskFilter));
+    }
+  }, [tasks, taskFilter]);
+
   const fetchData = async () => {
     try {
       const [childrenRes, tasksRes, notificationsRes] = await Promise.all([
