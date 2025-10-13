@@ -432,10 +432,10 @@ async def approve_task(task_id: str, current_user: dict = Depends(get_current_us
         }}
     )
     
-    # Update child's XP and earned amount
+    # Update child's XP, earned amount, and total allowance
     await db.users.update_one(
         {"id": task["child_id"]},
-        {"$inc": {"xp": task["xp"], "earned": task["value"]}}
+        {"$inc": {"xp": task["xp"], "earned": task["value"], "total_allowance": task["value"]}}
     )
     
     # Check for level up
