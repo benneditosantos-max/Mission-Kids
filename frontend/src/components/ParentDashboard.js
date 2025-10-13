@@ -48,13 +48,25 @@ const ModernParentDashboard = () => {
   });
 
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setChildren(mockChildren);
-      setTasks(mockTasks);
-      setLoading(false);
-    }, 1000);
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const [childrenRes, tasksRes] = await Promise.all([
+        axios.get('/users/children'),
+        axios.get('/tasks')
+      ]);
+      
+      setChildren(childrenRes.data);
+      setTasks(tasksRes.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Erro ao carregar dados');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
