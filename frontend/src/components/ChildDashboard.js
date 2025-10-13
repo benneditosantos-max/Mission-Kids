@@ -118,7 +118,7 @@ const ModernChildDashboard = () => {
                 <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center">
                   <Coins className="w-3 h-3 text-white" />
                 </div>
-                <span className="text-white font-bold">200</span>
+                <span className="text-white font-bold">{currentXp}</span>
               </div>
               <Button 
                 variant="ghost" 
