@@ -25,7 +25,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # JWT Configuration
-SECRET_KEY = os.environ.get('JWT_SECRET', 'missionkids_secret_key_2024')
+SECRET_KEY = os.environ['JWT_SECRET']
 ALGORITHM = "HS256"
 
 # Create directories for uploads
