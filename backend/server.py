@@ -471,9 +471,13 @@ async def get_transactions(child_id: str, current_user: dict = Depends(get_curre
     return transactions
 
 @api_router.post("/allowance/pay")
-async def pay_allowance(child_id: str, current_user: dict = Depends(get_current_user)):
+async def pay_allowance(request: dict, current_user: dict = Depends(get_current_user)):
     if current_user["role"] != "parent":
         raise HTTPException(status_code=403, detail="Only parents can pay allowance")
+    
+    child_id = request.get("child_id")
+    if not child_id:
+        raise HTTPException(status_code=400, detail="Child ID is required")
     
     child = await db.users.find_one({"id": child_id}, {"_id": 0})
     if not child:
