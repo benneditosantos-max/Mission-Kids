@@ -244,6 +244,30 @@ const ParentDashboard = () => {
     setShowGoalDialog(true);
   };
 
+  const handleApproveTask = async (taskId) => {
+    try {
+      await axios.post(`/tasks/${taskId}/approve`);
+      toast.success('Tarefa aprovada e creditada! 🎉');
+      fetchData();
+    } catch (error) {
+      console.error('Error approving task:', error);
+      toast.error('Erro ao aprovar tarefa');
+    }
+  };
+
+  const handleRejectTask = async (taskId) => {
+    const reason = window.prompt('Motivo da rejeição (opcional):');
+    
+    try {
+      await axios.post(`/tasks/${taskId}/reject`, { reason: reason || 'Não especificado' });
+      toast.success('Tarefa rejeitada');
+      fetchData();
+    } catch (error) {
+      console.error('Error rejecting task:', error);
+      toast.error('Erro ao rejeitar tarefa');
+    }
+  };
+
   const getTaskStatusColor = (status) => {
     switch (status) {
       case 'approved': return 'bg-green-500 text-white';
