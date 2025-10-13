@@ -461,31 +461,89 @@ class MissionKidsAPITester:
         
         return False
 
-    def test_create_savings_goal(self):
-        """Test creating a savings goal"""
+    def test_savings_goals_management(self):
+        """Test comprehensive savings goals management including 3-goal limit"""
         if not self.parent_token or not self.child_id:
-            self.log_test("Create Savings Goal", False, "Missing parent token or child ID")
+            self.log_test("Savings Goals Management", False, "Missing parent token or child ID")
             return False
+        
+        self.goal_ids = []
+        
+        # Test creating 3 savings goals
+        goals_data = [
+            {"name": "Bicicleta", "target": 200.0},
+            {"name": "Jogo", "target": 50.0},
+            {"name": "Livro", "target": 30.0}
+        ]
+        
+        for goal_data in goals_data:
+            data = {
+                "child_id": self.child_id,
+                "name": goal_data["name"],
+                "target": goal_data["target"]
+            }
             
-        data = {
+            response = self.make_request('POST', 'savings-goals', data, token=self.parent_token)
+            
+            if response and response.status_code == 200:
+                goal_result = response.json()
+                if 'id' in goal_result:
+                    self.goal_ids.append(goal_result['id'])
+                    self.goal_id = goal_result['id']  # Set for other tests
+                else:
+                    self.log_test("Savings Goals Management", False, f"Missing goal ID for {goal_data['name']}")
+                    return False
+            else:
+                error_msg = response.json().get('detail', 'Unknown error') if response else 'No response'
+                self.log_test("Savings Goals Management", False, f"Failed to create {goal_data['name']}: {error_msg}")
+                return False
+        
+        # Test 4th goal should fail (3-goal limit)
+        fourth_goal_data = {
             "child_id": self.child_id,
-            "name": "Test Goal",
-            "target": 50.0
+            "name": "Quarto Objetivo",
+            "target": 100.0
         }
         
-        response = self.make_request('POST', 'savings-goals', data, token=self.parent_token)
+        fourth_response = self.make_request('POST', 'savings-goals', fourth_goal_data, token=self.parent_token)
         
-        if response and response.status_code == 200:
-            goal_data = response.json()
-            if 'id' in goal_data:
-                self.goal_id = goal_data['id']
-                self.log_test("Create Savings Goal", True)
-                return True
+        # This should fail, but let's check if the backend enforces the limit
+        if fourth_response and fourth_response.status_code == 200:
+            # If it succeeds, the 3-goal limit is not enforced
+            self.log_test("Savings Goals Management", False, "4th goal creation should have failed (3-goal limit not enforced)")
+            return False
+        
+        # Test getting all goals
+        get_response = self.make_request('GET', f'savings-goals/{self.child_id}', token=self.parent_token)
+        
+        if not get_response or get_response.status_code != 200:
+            self.log_test("Savings Goals Management", False, "Failed to get savings goals")
+            return False
+        
+        goals = get_response.json()
+        if len(goals) != 3:
+            self.log_test("Savings Goals Management", False, f"Expected 3 goals, got {len(goals)}")
+            return False
+        
+        # Test deleting one goal
+        if self.goal_ids:
+            delete_response = self.make_request('DELETE', f'savings-goals/{self.goal_ids[0]}', token=self.parent_token)
+            
+            if not delete_response or delete_response.status_code != 200:
+                self.log_test("Savings Goals Management", False, "Failed to delete savings goal")
+                return False
+            
+            # Verify goal is deleted
+            verify_response = self.make_request('GET', f'savings-goals/{self.child_id}', token=self.parent_token)
+            if verify_response and verify_response.status_code == 200:
+                remaining_goals = verify_response.json()
+                if len(remaining_goals) == 2:
+                    self.log_test("Savings Goals Management", True)
+                    return True
+                else:
+                    self.log_test("Savings Goals Management", False, f"Expected 2 goals after deletion, got {len(remaining_goals)}")
             else:
-                self.log_test("Create Savings Goal", False, "Missing goal ID in response")
-        else:
-            error_msg = response.json().get('detail', 'Unknown error') if response else 'No response'
-            self.log_test("Create Savings Goal", False, f"Status: {response.status_code if response else 'None'}, Error: {error_msg}")
+                self.log_test("Savings Goals Management", False, "Failed to verify goal deletion")
         
         return False
 
