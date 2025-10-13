@@ -171,13 +171,18 @@ class MissionKidsAPITester:
             self.log_test("Child Login", False, "No child registered for login test")
             return False
             
-        # Get child email from registration
-        child_response = self.make_request('GET', 'users/me', token=self.child_token)
-        if not child_response or child_response.status_code != 200:
-            self.log_test("Child Login", False, "Cannot get child info")
+        # Get child email from parent's children list
+        children_response = self.make_request('GET', 'users/children', token=self.parent_token)
+        if not children_response or children_response.status_code != 200:
+            self.log_test("Child Login", False, "Cannot get children list")
             return False
             
-        child_data = child_response.json()
+        children = children_response.json()
+        child_data = next((child for child in children if child['id'] == self.child_id), None)
+        if not child_data:
+            self.log_test("Child Login", False, "Child not found in children list")
+            return False
+            
         data = {
             "email": child_data['email'],
             "pin": "1234"
@@ -188,6 +193,7 @@ class MissionKidsAPITester:
         if login_response and login_response.status_code == 200:
             result = login_response.json()
             if 'token' in result and 'user' in result:
+                self.child_token = result['token']
                 self.log_test("Child Login", True)
                 return True
             else:
