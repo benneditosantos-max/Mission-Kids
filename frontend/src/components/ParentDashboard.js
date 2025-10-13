@@ -65,13 +65,19 @@ const ParentDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [childrenRes, tasksRes] = await Promise.all([
+      const [childrenRes, tasksRes, notificationsRes] = await Promise.all([
         axios.get('/users/children'),
-        axios.get('/tasks')
+        axios.get('/tasks'),
+        axios.get('/notifications').catch(() => ({ data: [] }))
       ]);
       
       setChildren(childrenRes.data);
       setTasks(tasksRes.data);
+      setNotifications(notificationsRes.data);
+      
+      // Filter tasks awaiting validation
+      const awaitingValidation = tasksRes.data.filter(t => t.status === 'awaiting_validation');
+      setPendingTasks(awaitingValidation);
       
       // Fetch savings goals for each child
       const goalsMap = {};
