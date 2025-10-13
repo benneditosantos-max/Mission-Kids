@@ -24,38 +24,16 @@ const ModernParentDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateTask, setShowCreateTask] = useState(false);
+  const [showCreateChild, setShowCreateChild] = useState(false);
 
-  // Mock data for demo
-  const mockChildren = [
-    { 
-      id: 1, 
-      name: 'João', 
-      age: 13, 
-      email: 'joao@email.com',
-      level: 3,
-      xp: 150,
-      earned: 25.50,
-      allowance_goal: 50,
-      avatar: '👦'
-    },
-    { 
-      id: 2, 
-      name: 'Maria', 
-      age: 11, 
-      email: 'maria@email.com',
-      level: 2,
-      xp: 80,
-      earned: 15.00,
-      allowance_goal: 40,
-      avatar: '👧'
-    }
-  ];
-
-  const mockTasks = [
-    { id: 1, title: "Arrumar a cama", child_name: "João", value: 5.0, xp: 10, status: "pending" },
-    { id: 2, title: "Lavar louça", child_name: "Maria", value: 8.0, xp: 15, status: "completed" },
-    { id: 3, title: "Estudar matemática", child_name: "João", value: 10.0, xp: 20, status: "approved" }
-  ];
+  // Child registration form
+  const [childForm, setChildForm] = useState({
+    name: '',
+    age: '',
+    email: '',
+    pin: '',
+    allowance_goal: 50
+  });
 
   // Form state
   const [taskForm, setTaskForm] = useState({
