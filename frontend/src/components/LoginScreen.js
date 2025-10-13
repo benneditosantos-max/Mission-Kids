@@ -15,6 +15,7 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [showPinReset, setShowPinReset] = useState(false);
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
