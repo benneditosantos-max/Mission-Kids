@@ -61,6 +61,49 @@ const ModernChildDashboard = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    filterTasks();
+  }, [tasks, currentFilter]);
+
+  const filterTasks = () => {
+    let filtered = [...tasks];
+    
+    switch (currentFilter) {
+      case 'daily':
+        filtered = filtered.filter(task => task.frequency === 'daily');
+        break;
+      case 'weekly':
+        filtered = filtered.filter(task => task.frequency === 'weekly');
+        break;
+      case 'monthly':
+        filtered = filtered.filter(task => task.frequency === 'monthly');
+        break;
+      case 'awaiting':
+        filtered = filtered.filter(task => task.status === 'awaiting_validation');
+        break;
+      case 'pending':
+        filtered = filtered.filter(task => task.status === 'pending');
+        break;
+      case 'all':
+      default:
+        // Show all tasks
+        break;
+    }
+    
+    setFilteredTasks(filtered);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  // Pagination logic
+  const indexOfLastTask = currentPage * tasksPerPage;
+  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
+  const currentTasks = filteredTasks.slice(indexOfFirstTask, indexOfLastTask);
+  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   const handleCompleteTask = async (taskId) => {
     try {
       await axios.post(`/tasks/${taskId}/complete`);
