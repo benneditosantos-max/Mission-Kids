@@ -215,6 +215,10 @@ async def login(login_data: UserLogin):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    # Ensure user has role field (defensive programming)
+    if "role" not in user:
+        raise HTTPException(status_code=500, detail="User account data incomplete")
+    
     # For children, verify PIN
     if user["role"] == "child":
         if not login_data.pin or login_data.pin != user.get("pin"):
