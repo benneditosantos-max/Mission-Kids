@@ -25,6 +25,9 @@ const ParentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showCreateChild, setShowCreateChild] = useState(false);
+  const [showGoalDialog, setShowGoalDialog] = useState(false);
+  const [selectedChild, setSelectedChild] = useState(null);
+  const [savingsGoals, setSavingsGoals] = useState({});
 
   // Child registration form
   const [childForm, setChildForm] = useState({
@@ -33,6 +36,13 @@ const ParentDashboard = () => {
     email: '',
     pin: '',
     allowance_goal: 50
+  });
+
+  // Savings goal form
+  const [goalForm, setGoalForm] = useState({
+    name: '',
+    target: 0,
+    child_id: ''
   });
 
   // Form state
