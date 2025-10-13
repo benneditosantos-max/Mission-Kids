@@ -315,6 +315,43 @@ async def get_children(current_user: dict = Depends(get_current_user)):
     children = await db.users.find({"parent_id": current_user["id"]}, {"_id": 0}).to_list(100)
     return children
 
+@api_router.post("/children")
+async def register_child(child_data: dict, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "parent":
+        raise HTTPException(status_code=403, detail="Only parents can register children")
+    
+    # Validate required fields
+    if not child_data.get("name") or not child_data.get("email") or not child_data.get("pin"):
+        raise HTTPException(status_code=400, detail="Name, email, and PIN are required")
+    
+    # Check if email already exists
+    existing = await db.users.find_one({"email": child_data["email"]})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Validate PIN format (4 digits)
+    if not child_data["pin"].isdigit() or len(child_data["pin"]) != 4:
+        raise HTTPException(status_code=400, detail="PIN must be exactly 4 digits")
+    
+    # Create child user
+    child_user = User(
+        email=child_data["email"],
+        name=child_data["name"],
+        role=UserRole.CHILD,
+        pin=child_data["pin"],
+        parent_id=current_user["id"],
+        avatar=child_data.get("avatar", "hero1"),
+        allowance_goal=child_data.get("allowance_goal", 50.0)
+    )
+    
+    # Convert to dict and serialize datetime
+    doc = child_user.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    
+    await db.users.insert_one(doc)
+    
+    return {"success": True, "child": child_user}
+
 @api_router.put("/users/avatar")
 async def update_avatar(request: dict, current_user: dict = Depends(get_current_user)):
     avatar = request.get("avatar")
