@@ -86,6 +86,11 @@ class UserLogin(BaseModel):
     password: Optional[str] = None
     pin: Optional[str] = None
 
+class PasswordReset(BaseModel):
+    email: str
+    name: str
+    new_password: str
+
 class Task(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
