@@ -59,14 +59,15 @@ const ModernChildDashboard = () => {
 
   const handleCompleteTask = async (taskId) => {
     try {
-      // Update task locally for demo
-      setTasks(prev => prev.map(task => 
-        task.id === taskId ? { ...task, status: 'completed' } : task
-      ));
+      await axios.post(`/tasks/${taskId}/complete`);
+      
+      // Refresh data
+      await fetchData();
       
       playSound('complete');
       toast.success('Missão concluída! 🎉');
     } catch (error) {
+      console.error('Error completing task:', error);
       toast.error('Erro ao concluir missão');
     }
   };
