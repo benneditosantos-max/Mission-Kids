@@ -209,68 +209,152 @@ const ModernChildDashboard = () => {
               <h2 className="text-2xl font-bold font-nunito text-gray-800">Minhas Tarefas</h2>
             </div>
 
-            {tasks.length === 0 ? (
+            {/* Filter Buttons */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button
+                onClick={() => setCurrentFilter('all')}
+                className={`rounded-xl ${currentFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Todas ({tasks.length})
+              </Button>
+              <Button
+                onClick={() => setCurrentFilter('pending')}
+                className={`rounded-xl ${currentFilter === 'pending' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Pendentes ({tasks.filter(t => t.status === 'pending').length})
+              </Button>
+              <Button
+                onClick={() => setCurrentFilter('awaiting')}
+                className={`rounded-xl ${currentFilter === 'awaiting' ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Aguardando Validação ({tasks.filter(t => t.status === 'awaiting_validation').length})
+              </Button>
+              <Button
+                onClick={() => setCurrentFilter('daily')}
+                className={`rounded-xl ${currentFilter === 'daily' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Diária
+              </Button>
+              <Button
+                onClick={() => setCurrentFilter('weekly')}
+                className={`rounded-xl ${currentFilter === 'weekly' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Semanal
+              </Button>
+              <Button
+                onClick={() => setCurrentFilter('monthly')}
+                className={`rounded-xl ${currentFilter === 'monthly' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Mensal
+              </Button>
+            </div>
+
+            {filteredTasks.length === 0 ? (
               <div className="bg-gray-50 rounded-2xl p-8 text-center">
                 <div className="text-6xl mb-4">📋</div>
-                <p className="text-gray-600">Nenhuma tarefa no momento!</p>
+                <p className="text-gray-600">Nenhuma tarefa encontrada para este filtro!</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {tasks.map((task) => (
-                  <div 
-                    key={task.id} 
-                    className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all duration-300"
-                    data-testid={`task-card-${task.id}`}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        task.status === 'completed' || task.status === 'approved' ? 'bg-green-500' : 'bg-blue-500'
-                      }`}>
-                        {task.status === 'completed' || task.status === 'approved' ? (
-                          <CheckCircle className="w-5 h-5 text-white" />
-                        ) : (
-                          <Clock className="w-5 h-5 text-white" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">{task.title}</h3>
-                        {task.description && (
-                          <p className="text-sm text-gray-500">{task.description}</p>
-                        )}
-                        <div className="flex items-center space-x-3 text-sm text-gray-600 mt-1">
-                          <span className="flex items-center">
-                            <Coins className="w-4 h-4 mr-1 text-green-500" />
-                            R$ {task.value.toFixed(2)}
-                          </span>
-                          <span className="flex items-center">
-                            <Star className="w-4 h-4 mr-1 text-purple-500" />
-                            {task.xp} XP
-                          </span>
+              <>
+                <div className="space-y-4">
+                  {currentTasks.map((task) => (
+                    <div 
+                      key={task.id} 
+                      className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all duration-300"
+                      data-testid={`task-card-${task.id}`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          task.status === 'approved' ? 'bg-green-500' : 
+                          task.status === 'awaiting_validation' ? 'bg-yellow-500' :
+                          'bg-blue-500'
+                        }`}>
+                          {task.status === 'approved' ? (
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          ) : task.status === 'awaiting_validation' ? (
+                            <Clock className="w-5 h-5 text-white" />
+                          ) : (
+                            <Clock className="w-5 h-5 text-white" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-800">{task.title}</h3>
+                          {task.description && (
+                            <p className="text-sm text-gray-500">{task.description}</p>
+                          )}
+                          <div className="flex items-center space-x-3 text-sm text-gray-600 mt-1">
+                            <span className="flex items-center">
+                              <Coins className="w-4 h-4 mr-1 text-green-500" />
+                              R$ {task.value.toFixed(2)}
+                            </span>
+                            <span className="flex items-center">
+                              <Star className="w-4 h-4 mr-1 text-purple-500" />
+                              {task.xp} XP
+                            </span>
+                            <Badge className="text-xs">
+                              {task.frequency === 'daily' ? '📅 Diária' : 
+                               task.frequency === 'weekly' ? '📆 Semanal' : '📋 Mensal'}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
+                      
+                      <div className="flex items-center space-x-3">
+                        {task.status === 'pending' && (
+                          <Button
+                            onClick={() => handleCompleteTask(task.id)}
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-4 py-2 font-medium"
+                            data-testid={`complete-task-${task.id}`}
+                          >
+                            Concluir
+                          </Button>
+                        )}
+                        {task.status === 'awaiting_validation' && (
+                          <Badge className="bg-yellow-100 text-yellow-800">⏳ Aguardando aprovação</Badge>
+                        )}
+                        {task.status === 'approved' && (
+                          <Badge className="bg-green-100 text-green-800">✓ Aprovada</Badge>
+                        )}
+                        {task.status === 'rejected' && (
+                          <Badge className="bg-red-100 text-red-800">✗ Rejeitada</Badge>
+                        )}
+                        <ArrowRight className="w-5 h-5 text-gray-400" />
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-3">
-                      {task.status === 'pending' && (
-                        <Button
-                          onClick={() => handleCompleteTask(task.id)}
-                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-4 py-2 font-medium"
-                          data-testid={`complete-task-${task.id}`}
-                        >
-                          Concluir
-                        </Button>
-                      )}
-                      {task.status === 'completed' && (
-                        <Badge className="bg-yellow-100 text-yellow-800">Aguardando aprovação</Badge>
-                      )}
-                      {task.status === 'approved' && (
-                        <Badge className="bg-green-100 text-green-800">Aprovada ✓</Badge>
-                      )}
-                      <ArrowRight className="w-5 h-5 text-gray-400" />
-                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2 mt-6">
+                    <Button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="rounded-xl"
+                      variant="outline"
+                    >
+                      Anterior
+                    </Button>
+                    {[...Array(totalPages)].map((_, index) => (
+                      <Button
+                        key={index + 1}
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`rounded-xl ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                      >
+                        {index + 1}
+                      </Button>
+                    ))}
+                    <Button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="rounded-xl"
+                      variant="outline"
+                    >
+                      Próximo
+                    </Button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
 
