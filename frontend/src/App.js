@@ -9,16 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Flame, Database, Cloud } from 'lucide-react';
 
-// Import components - Original MongoDB version
+// Import components - Modern Design (now default)
 import LoginScreen from '@/components/LoginScreen';
 import ChildDashboard from '@/components/ChildDashboard';
 import ParentDashboard from '@/components/ParentDashboard';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-
-// Import Modern Design components
-import ModernLoginScreen from '@/components/ModernLoginScreen';
-import ModernChildDashboard from '@/components/ModernChildDashboard';
-import ModernParentDashboard from '@/components/ModernParentDashboard';
 
 // Import Firebase version
 import FirebaseApp from '@/components/FirebaseApp';
