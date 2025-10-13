@@ -571,6 +571,15 @@ async def create_savings_goal(goal_data: dict, current_user: dict = Depends(get_
     if current_user["role"] != "parent":
         raise HTTPException(status_code=403, detail="Only parents can create savings goals")
     
+    # Check if child already has 3 goals
+    child_id = goal_data.get("child_id")
+    if not child_id:
+        raise HTTPException(status_code=400, detail="child_id is required")
+    
+    existing_goals = await db.savings_goals.find({"child_id": child_id}, {"_id": 0}).to_list(100)
+    if len(existing_goals) >= 3:
+        raise HTTPException(status_code=400, detail="Each child can have a maximum of 3 savings goals")
+    
     goal_obj = SavingsGoal(**goal_data)
     doc = goal_obj.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
