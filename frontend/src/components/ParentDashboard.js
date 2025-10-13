@@ -154,7 +154,7 @@ const ParentDashboard = () => {
 
   const handlePayAllowance = async (childId) => {
     try {
-      const response = await axios.post('/allowance/pay', null, { params: { child_id: childId } });
+      const response = await axios.post('/allowance/pay', { child_id: childId });
       toast.success(`Mesada paga: R$ ${response.data.amount_paid.toFixed(2)} 💰`);
       playSound('coin');
       fetchData();
