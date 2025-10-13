@@ -191,22 +191,38 @@ const ParentDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold font-nunito text-gray-800">Painel dos Pais</h1>
-              <p className="text-gray-600">Gerencie as missões e recompensas dos seus filhos</p>
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white text-xl font-bold">👤</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold font-nunito text-white">Mesh</h1>
+                <p className="text-white/80 text-sm">Bem-vindo, {user?.name || 'Gabriel'}</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+                <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">💰</span>
+                </div>
+                <span className="text-white font-bold">200</span>
+              </div>
               {pendingApprovalTasks.length > 0 && (
-                <Badge className="bg-orange-100 text-orange-800 font-nunito">
-                  {pendingApprovalTasks.length} aguardando aprovação
+                <Badge className="bg-orange-500 text-white font-nunito">
+                  {pendingApprovalTasks.length}
                 </Badge>
               )}
-              <Button variant="outline" onClick={logout} data-testid="logout-btn">
+              <Button 
+                variant="ghost" 
+                onClick={logout} 
+                data-testid="logout-btn"
+                className="text-white hover:bg-white/20"
+              >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sair
               </Button>
