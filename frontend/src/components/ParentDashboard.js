@@ -384,11 +384,11 @@ const ModernParentDashboard = () => {
                         style={{ width: `${(child.earned / child.allowance_goal) * 100}%` }}
                       ></div>
                     </div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            )}
 
           {/* Tasks Section */}
           <div className="mb-8">
