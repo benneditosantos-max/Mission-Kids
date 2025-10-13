@@ -159,62 +159,72 @@ const ModernChildDashboard = () => {
           {/* Tasks Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold font-nunito text-gray-800">Tarefas</h2>
-              <Button 
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl px-6 py-3 font-bold shadow-lg"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Adicionar Tarefa
-              </Button>
+              <h2 className="text-2xl font-bold font-nunito text-gray-800">Minhas Tarefas</h2>
             </div>
 
-            <div className="space-y-4">
-              {tasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all duration-300"
-                  data-testid={`task-card-${task.id}`}
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      task.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
-                    }`}>
-                      {task.status === 'completed' ? (
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      ) : (
-                        <Clock className="w-5 h-5 text-white" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800">{task.title}</h3>
-                      <div className="flex items-center space-x-3 text-sm text-gray-600">
-                        <span className="flex items-center">
-                          <Coins className="w-4 h-4 mr-1 text-green-500" />
-                          R$ {task.value.toFixed(2)}
-                        </span>
-                        <span className="flex items-center">
-                          <Star className="w-4 h-4 mr-1 text-purple-500" />
-                          {task.xp} XP
-                        </span>
+            {tasks.length === 0 ? (
+              <div className="bg-gray-50 rounded-2xl p-8 text-center">
+                <div className="text-6xl mb-4">📋</div>
+                <p className="text-gray-600">Nenhuma tarefa no momento!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {tasks.map((task) => (
+                  <div 
+                    key={task.id} 
+                    className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all duration-300"
+                    data-testid={`task-card-${task.id}`}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        task.status === 'completed' || task.status === 'approved' ? 'bg-green-500' : 'bg-blue-500'
+                      }`}>
+                        {task.status === 'completed' || task.status === 'approved' ? (
+                          <CheckCircle className="w-5 h-5 text-white" />
+                        ) : (
+                          <Clock className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800">{task.title}</h3>
+                        {task.description && (
+                          <p className="text-sm text-gray-500">{task.description}</p>
+                        )}
+                        <div className="flex items-center space-x-3 text-sm text-gray-600 mt-1">
+                          <span className="flex items-center">
+                            <Coins className="w-4 h-4 mr-1 text-green-500" />
+                            R$ {task.value.toFixed(2)}
+                          </span>
+                          <span className="flex items-center">
+                            <Star className="w-4 h-4 mr-1 text-purple-500" />
+                            {task.xp} XP
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      {task.status === 'pending' && (
+                        <Button
+                          onClick={() => handleCompleteTask(task.id)}
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-4 py-2 font-medium"
+                          data-testid={`complete-task-${task.id}`}
+                        >
+                          Concluir
+                        </Button>
+                      )}
+                      {task.status === 'completed' && (
+                        <Badge className="bg-yellow-100 text-yellow-800">Aguardando aprovação</Badge>
+                      )}
+                      {task.status === 'approved' && (
+                        <Badge className="bg-green-100 text-green-800">Aprovada ✓</Badge>
+                      )}
+                      <ArrowRight className="w-5 h-5 text-gray-400" />
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    {task.status === 'pending' && (
-                      <Button
-                        onClick={() => handleCompleteTask(task.id)}
-                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl px-4 py-2 font-medium"
-                        data-testid={`complete-task-${task.id}`}
-                      >
-                        Concluir
-                      </Button>
-                    )}
-                    <ArrowRight className="w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Weekly Summary */}
