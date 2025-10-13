@@ -7,15 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, Star, Users, Trophy } from 'lucide-react';
-import PasswordReset from './PasswordReset';
-import PinReset from './PinReset';
 
-const LoginScreen = () => {
+const ModernLoginScreen = () => {
   const { login, register } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  const [showPasswordReset, setShowPasswordReset] = useState(false);
-  const [showPinReset, setShowPinReset] = useState(false);
+  const [userType, setUserType] = useState('parent');
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -24,7 +21,7 @@ const LoginScreen = () => {
     pin: ''
   });
 
-  // Register form state
+  // Register form state  
   const [registerForm, setRegisterForm] = useState({
     email: '',
     name: '',
@@ -33,18 +30,6 @@ const LoginScreen = () => {
     pin: '',
     allowance_goal: 50
   });
-
-  const [userType, setUserType] = useState('parent');
-
-  // If password reset is shown, render it
-  if (showPasswordReset) {
-    return <PasswordReset onBack={() => setShowPasswordReset(false)} />;
-  }
-
-  // If PIN reset is shown, render it
-  if (showPinReset) {
-    return <PinReset onBack={() => setShowPinReset(false)} />;
-  }
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -80,156 +65,160 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo and Welcome */}
-        <div className="text-center mb-8">
-          <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 shadow-lg animate-bounce-in">
-            <Shield className="w-10 h-10 text-indigo-600" />
-          </div>
-          <h1 className="text-4xl font-bold font-nunito text-gray-800 mb-2">
-            Mission<span className="text-indigo-600">Kids</span>
-          </h1>
-          <p className="text-gray-600 font-nunito">
-            Cumprir tarefas virou uma missão divertida! 🎯
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-blue-400 via-blue-500 to-blue-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        {/* Main Login Card */}
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {/* Header with Logo */}
+          <div className="bg-white px-8 pt-8 pb-6">
+            <div className="text-center">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold font-nunito text-gray-800 mb-2">
+                Mission<span className="text-blue-600">Kids</span>
+              </h1>
+            </div>
 
-        <Card className="shadow-2xl border-0 backdrop-blur-sm bg-white/95">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-2xl font-nunito text-gray-800">
-              Bem-vindo de volta!
-            </CardTitle>
-            <CardDescription>
-              Entre para continuar sua aventura
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent>
+            {/* Character Selection */}
+            <div className="grid grid-cols-2 gap-3 mt-6">
+              {/* Child Character */}
+              <div 
+                className={`bg-gradient-to-br ${userType === 'child' ? 'from-yellow-200 to-orange-200 ring-2 ring-orange-400' : 'from-yellow-100 to-orange-100'} rounded-2xl p-4 text-center cursor-pointer transition-all duration-300`}
+                onClick={() => setUserType('child')}
+              >
+                <div className="text-4xl mb-2">👦</div>
+                <p className="text-xs font-semibold text-gray-700">Criança</p>
+              </div>
+              
+              {/* Parent Character */}
+              <div 
+                className={`bg-gradient-to-br ${userType === 'parent' ? 'from-blue-200 to-purple-200 ring-2 ring-blue-400' : 'from-blue-100 to-purple-100'} rounded-2xl p-4 text-center cursor-pointer transition-all duration-300`}
+                onClick={() => setUserType('parent')}
+              >
+                <div className="text-4xl mb-2">👨‍👩‍👧</div>
+                <p className="text-xs font-semibold text-gray-700">Pais</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Login Form */}
+          <div className="px-8 pb-8">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login" className="font-nunito">Entrar</TabsTrigger>
-                <TabsTrigger value="register" className="font-nunito">Cadastrar</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-100">
+                <TabsTrigger value="login" className="font-nunito rounded-xl">Entrar</TabsTrigger>
+                <TabsTrigger value="register" className="font-nunito rounded-xl">Cadastrar</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="login">
+              <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
-                  {/* User Type Selection */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <Button
-                      type="button"
-                      variant={userType === 'parent' ? 'default' : 'outline'}
-                      onClick={() => setUserType('parent')}
-                      className="h-12 font-nunito"
-                      data-testid="parent-login-btn"
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      Pais
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={userType === 'child' ? 'default' : 'outline'}
-                      onClick={() => setUserType('child')}
-                      className="h-12 font-nunito"
-                      data-testid="child-login-btn"
-                    >
-                      <Star className="w-4 h-4 mr-2" />
-                      Crianças
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={loginForm.email}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
-                      required
-                      data-testid="login-email-input"
-                    />
-                  </div>
-
                   {userType === 'parent' ? (
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Senha</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Sua senha"
-                        value={loginForm.password}
-                        onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                        required
-                        data-testid="login-password-input"
-                      />
-                    </div>
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="seu@email.com"
+                          value={loginForm.email}
+                          onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
+                          required
+                          className="rounded-xl border-gray-200 h-12"
+                          data-testid="login-email-input"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="password" className="text-sm font-medium text-gray-700">Senha</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="Sua senha"
+                          value={loginForm.password}
+                          onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+                          required
+                          className="rounded-xl border-gray-200 h-12"
+                          data-testid="login-password-input"
+                        />
+                      </div>
+                    </>
                   ) : (
-                    <div className="space-y-2">
-                      <Label htmlFor="pin">PIN (4 dígitos)</Label>
-                      <Input
-                        id="pin"
-                        type="password"
-                        placeholder="0000"
-                        maxLength={4}
-                        value={loginForm.pin}
-                        onChange={(e) => setLoginForm(prev => ({ ...prev, pin: e.target.value }))}
-                        required
-                        data-testid="login-pin-input"
-                      />
-                    </div>
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="seu@email.com"
+                          value={loginForm.email}
+                          onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
+                          required
+                          className="rounded-xl border-gray-200 h-12"
+                          data-testid="login-email-input"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="pin" className="text-sm font-medium text-gray-700">PIN (4 dígitos)</Label>
+                        <Input
+                          id="pin"
+                          type="password"
+                          placeholder="0000"
+                          maxLength={4}
+                          value={loginForm.pin}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                            setLoginForm(prev => ({ ...prev, pin: value }));
+                          }}
+                          required
+                          className="rounded-xl border-gray-200 h-12 text-center text-2xl tracking-widest font-mono"
+                          data-testid="login-pin-input"
+                        />
+                      </div>
+                    </>
                   )}
 
                   <Button 
                     type="submit" 
-                    className="w-full h-12 font-nunito bg-indigo-600 hover:bg-indigo-700"
+                    className={`w-full h-12 font-nunito rounded-2xl text-white font-bold shadow-lg transition-all duration-200 hover:scale-105 ${
+                      userType === 'parent' 
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' 
+                        : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
+                    }`}
                     disabled={isLoading}
                     data-testid="login-submit-btn"
                   >
                     {isLoading ? 'Entrando...' : 'Entrar'}
                   </Button>
-
-                  {/* Recovery Links */}
-                  <div className="text-center mt-3">
-                    {userType === 'parent' ? (
-                      <button
-                        type="button"
-                        onClick={() => setShowPasswordReset(true)}
-                        className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline transition-colors font-nunito"
-                        data-testid="forgot-password-link"
-                      >
-                        Esqueci minha senha
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setShowPinReset(true)}
-                        className="text-sm text-purple-600 hover:text-purple-800 hover:underline transition-colors font-nunito"
-                        data-testid="forgot-pin-link"
-                      >
-                        Esqueci meu PIN
-                      </button>
-                    )}
-                  </div>
                 </form>
               </TabsContent>
               
-              <TabsContent value="register">
+              <TabsContent value="register" className="space-y-4">
+                <div className="mb-4 p-3 bg-blue-50 rounded-xl border-l-4 border-blue-400">
+                  <p className="text-sm text-blue-700 font-medium">
+                    👨‍👩‍👧 Apenas pais podem se cadastrar
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Contas das crianças são criadas pelos pais
+                  </p>
+                </div>
+
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reg-name">Nome</Label>
+                    <Label htmlFor="reg-name" className="text-sm font-medium text-gray-700">Nome Completo</Label>
                     <Input
                       id="reg-name"
-                      placeholder="Seu nome"
+                      placeholder="Seu nome completo"
                       value={registerForm.name}
                       onChange={(e) => setRegisterForm(prev => ({ ...prev, name: e.target.value }))}
                       required
+                      className="rounded-xl border-gray-200 h-12"
                       data-testid="register-name-input"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="reg-email">Email</Label>
+                    <Label htmlFor="reg-email" className="text-sm font-medium text-gray-700">Email</Label>
                     <Input
                       id="reg-email"
                       type="email"
@@ -237,107 +226,53 @@ const LoginScreen = () => {
                       value={registerForm.email}
                       onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
                       required
+                      className="rounded-xl border-gray-200 h-12"
                       data-testid="register-email-input"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="reg-password">Senha</Label>
+                    <Label htmlFor="reg-password" className="text-sm font-medium text-gray-700">Senha</Label>
                     <Input
                       id="reg-password"
                       type="password"
-                      placeholder="Crie uma senha"
+                      placeholder="Mínimo 6 caracteres"
                       value={registerForm.password}
                       onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
                       required
+                      minLength={6}
+                      className="rounded-xl border-gray-200 h-12"
                       data-testid="register-password-input"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Tipo de conta</Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        type="button"
-                        variant={registerForm.role === 'parent' ? 'default' : 'outline'}
-                        onClick={() => setRegisterForm(prev => ({ ...prev, role: 'parent' }))}
-                        className="h-10 font-nunito"
-                        data-testid="register-parent-btn"
-                      >
-                        <Users className="w-4 h-4 mr-2" />
-                        Pai/Mãe
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={registerForm.role === 'child' ? 'default' : 'outline'}
-                        onClick={() => setRegisterForm(prev => ({ ...prev, role: 'child' }))}
-                        className="h-10 font-nunito"
-                        data-testid="register-child-btn"
-                      >
-                        <Star className="w-4 h-4 mr-2" />
-                        Criança
-                      </Button>
-                    </div>
-                  </div>
-
-                  {registerForm.role === 'child' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="reg-pin">PIN (4 dígitos)</Label>
-                      <Input
-                        id="reg-pin"
-                        type="password"
-                        placeholder="0000"
-                        maxLength={4}
-                        value={registerForm.pin}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, pin: e.target.value }))}
-                        required
-                        data-testid="register-pin-input"
-                      />
-                    </div>
-                  )}
-
-                  {registerForm.role === 'parent' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="allowance">Meta de Mesada (R$)</Label>
-                      <Input
-                        id="allowance"
-                        type="number"
-                        placeholder="50"
-                        min="1"
-                        value={registerForm.allowance_goal}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, allowance_goal: e.target.value }))}
-                        data-testid="register-allowance-input"
-                      />
-                    </div>
-                  )}
-
                   <Button 
                     type="submit" 
-                    className="w-full h-12 font-nunito bg-indigo-600 hover:bg-indigo-700"
+                    className="w-full h-12 font-nunito bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl font-bold shadow-lg transition-all duration-200 hover:scale-105"
                     disabled={isLoading}
                     data-testid="register-submit-btn"
                   >
-                    {isLoading ? 'Criando conta...' : 'Criar conta'}
+                    {isLoading ? 'Criando conta...' : 'Criar Conta'}
                   </Button>
                 </form>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Features showcase */}
-        <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-            <Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
-            <p className="text-xs font-nunito text-gray-600">Ganhe XP</p>
+        {/* Features showcase - More compact */}
+        <div className="mt-4 grid grid-cols-3 gap-2 px-4">
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 text-center">
+            <Trophy className="w-4 h-4 text-yellow-300 mx-auto mb-1" />
+            <p className="text-xs font-nunito text-white">XP</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-            <Star className="w-6 h-6 text-purple-500 mx-auto mb-1" />
-            <p className="text-xs font-nunito text-gray-600">Missões</p>
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 text-center">
+            <Star className="w-4 h-4 text-white mx-auto mb-1" />
+            <p className="text-xs font-nunito text-white">Missões</p>
           </div>
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3">
-            <Shield className="w-6 h-6 text-blue-500 mx-auto mb-1" />
-            <p className="text-xs font-nunito text-gray-600">Mesada</p>
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2 text-center">
+            <Shield className="w-4 h-4 text-blue-300 mx-auto mb-1" />
+            <p className="text-xs font-nunito text-white">Mesada</p>
           </div>
         </div>
       </div>
@@ -345,4 +280,4 @@ const LoginScreen = () => {
   );
 };
 
-export default LoginScreen;
+export default ModernLoginScreen;
