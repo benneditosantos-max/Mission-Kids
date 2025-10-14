@@ -805,15 +805,43 @@ const ParentDashboard = () => {
               </Dialog>
             </div>
 
+            {/* Task Filters */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button
+                onClick={() => setTaskFilter('all')}
+                className={`rounded-xl ${taskFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Todas ({tasks.length})
+              </Button>
+              <Button
+                onClick={() => setTaskFilter('daily')}
+                className={`rounded-xl ${taskFilter === 'daily' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                📅 Diárias ({tasks.filter(t => t.frequency === 'daily').length})
+              </Button>
+              <Button
+                onClick={() => setTaskFilter('weekly')}
+                className={`rounded-xl ${taskFilter === 'weekly' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                📆 Semanais ({tasks.filter(t => t.frequency === 'weekly').length})
+              </Button>
+              <Button
+                onClick={() => setTaskFilter('monthly')}
+                className={`rounded-xl ${taskFilter === 'monthly' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                📋 Mensais ({tasks.filter(t => t.frequency === 'monthly').length})
+              </Button>
+            </div>
+
             <div className="space-y-4">
-              {tasks.length === 0 ? (
+              {filteredTasks.length === 0 ? (
                 <div className="bg-gray-50 rounded-2xl p-8 text-center">
                   <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-gray-600 mb-2">Nenhuma tarefa criada</h3>
-                  <p className="text-gray-500">Crie a primeira tarefa para seus filhos!</p>
+                  <h3 className="text-lg font-bold text-gray-600 mb-2">Nenhuma tarefa encontrada</h3>
+                  <p className="text-gray-500">Nenhuma tarefa corresponde ao filtro selecionado!</p>
                 </div>
               ) : (
-                tasks.map((task) => {
+                filteredTasks.map((task) => {
                   const child = children.find(c => c.id === task.child_id);
                   return (
                     <div 
@@ -825,7 +853,7 @@ const ParentDashboard = () => {
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getTaskStatusColor(task.status)}`}>
                           {task.status === 'approved' ? (
                             <CheckCircle className="w-5 h-5" />
-                          ) : task.status === 'completed' ? (
+                          ) : task.status === 'awaiting_validation' ? (
                             <Clock className="w-5 h-5" />
                           ) : (
                             <Star className="w-5 h-5" />
@@ -843,13 +871,37 @@ const ParentDashboard = () => {
                               <Star className="w-3 h-3 mr-1 text-purple-500" />
                               {task.xp} XP
                             </span>
+                            <Badge className="text-xs">
+                              {task.frequency === 'daily' ? '📅 Diária' : 
+                               task.frequency === 'weekly' ? '📆 Semanal' : '📋 Mensal'}
+                            </Badge>
                           </div>
                         </div>
                       </div>
                       
-                      <Badge className={`${getTaskStatusColor(task.status)} rounded-xl px-3 py-1`}>
-                        {getTaskStatusText(task.status)}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={`${getTaskStatusColor(task.status)} rounded-xl px-3 py-1`}>
+                          {getTaskStatusText(task.status)}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditTask(task)}
+                          className="hover:bg-blue-100"
+                          title="Editar tarefa"
+                        >
+                          <Edit className="w-4 h-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="hover:bg-red-100"
+                          title="Deletar tarefa"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </Button>
+                      </div>
                     </div>
                   );
                 })
