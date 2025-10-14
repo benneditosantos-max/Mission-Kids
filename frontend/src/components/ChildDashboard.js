@@ -439,26 +439,35 @@ const ModernChildDashboard = () => {
             </Button>
           </div>
 
-          {/* Shop Section Preview */}
+          {/* XP Store Section */}
           <div className="mt-8">
-            <h2 className="text-xl font-bold font-nunito text-gray-800 mb-4">Loja</h2>
-            <div className="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 text-center">
-              <div className="text-6xl mb-4">🎁</div>
+            <h2 className="text-xl font-bold font-nunito text-gray-800 mb-4">🎁 Loja de XP</h2>
+            <div className="bg-gradient-to-br from-purple-100 via-pink-100 to-orange-100 rounded-2xl p-6 text-center">
+              <div className="text-6xl mb-4">✨</div>
               <h3 className="text-lg font-bold text-gray-800 mb-2">
                 Desbloqueie recompensas incríveis!
               </h3>
               <p className="text-gray-600 mb-4">
-                Use seus pontos para comprar avatares, jogos e muito mais
+                Use seu XP para comprar avatares épicos e acessórios exclusivos!
               </p>
               <Button 
-                className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-2xl px-6 py-3 font-bold"
+                onClick={() => setShowStore(true)}
+                className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 text-white rounded-2xl px-6 py-3 font-bold shadow-lg transform transition-all duration-200 hover:scale-105"
               >
-                Ver Loja
+                🛒 Abrir Loja
               </Button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Store Modal */}
+      <StoreModal 
+        isOpen={showStore}
+        onClose={() => setShowStore(false)}
+        userXP={currentXp}
+        onPurchaseSuccess={handlePurchaseSuccess}
+      />
     </div>
   );
 };
