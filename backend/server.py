@@ -57,6 +57,17 @@ class TaskStatus(str, Enum):
     APPROVED = "approved"
     REJECTED = "rejected"
 
+class ItemType(str, Enum):
+    AVATAR = "avatar"
+    ACCESSORY = "accessory"
+
+class ItemClassification(str, Enum):
+    SIMPLE = "simple"
+    COMMON = "common"
+    IMPORTANT = "important"
+    RARE = "rare"
+    DIAMOND = "diamond"
+
 # Models
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
