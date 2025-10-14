@@ -197,6 +197,19 @@ const ModernLoginScreen = () => {
                   >
                     {isLoading ? 'Entrando...' : 'Entrar'}
                   </Button>
+
+                  {/* Forgot Password Link - Only for parents */}
+                  {userType === 'parent' && (
+                    <div className="text-center mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium underline"
+                      >
+                        Esqueci minha senha
+                      </button>
+                    </div>
+                  )}
                 </form>
               </TabsContent>
               
