@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { 
   Plus, Users, CheckCircle, Clock, DollarSign, Star, 
   Settings, LogOut, RefreshCw, Award, Target, TrendingUp,
-  Camera, AlertCircle, Trash2, Edit, Eye, Baby
+  Camera, AlertCircle, Trash2, Edit, Eye, Baby, Coins
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
