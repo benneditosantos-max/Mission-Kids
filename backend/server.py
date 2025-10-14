@@ -897,6 +897,124 @@ async def mark_notifications_read(notification_ids: dict, current_user: dict = D
     
     return {"success": True}
 
+# XP Store endpoints
+@api_router.get("/store/items")
+async def get_store_items(current_user: dict = Depends(get_current_user)):
+    """Get all items available in the XP store"""
+    items = await db.xp_store_items.find({}, {"_id": 0}).to_list(100)
+    return items
+
+@api_router.post("/store/purchase")
+async def purchase_item(purchase_data: dict, current_user: dict = Depends(get_current_user)):
+    """Purchase an item from the store using XP"""
+    if current_user["role"] != "child":
+        raise HTTPException(status_code=403, detail="Only children can purchase items")
+    
+    item_id = purchase_data.get("item_id")
+    if not item_id:
+        raise HTTPException(status_code=400, detail="item_id is required")
+    
+    # Get item details
+    item = await db.xp_store_items.find_one({"id": item_id}, {"_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    # Check if already owned
+    if item_id in current_user.get("inventory", []):
+        raise HTTPException(status_code=400, detail="You already own this item")
+    
+    # Check if user has enough XP
+    if current_user["xp"] < item["xp_cost"]:
+        raise HTTPException(status_code=400, detail=f"Insufficient XP. Need {item['xp_cost']} XP, have {current_user['xp']} XP")
+    
+    # Deduct XP and add item to inventory
+    new_xp = current_user["xp"] - item["xp_cost"]
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {
+            "$set": {"xp": new_xp},
+            "$push": {"inventory": item_id}
+        }
+    )
+    
+    return {
+        "success": True,
+        "message": f"Parabéns! Você adquiriu {item['item_name']}!",
+        "new_xp": new_xp,
+        "item": item
+    }
+
+@api_router.get("/store/inventory")
+async def get_inventory(current_user: dict = Depends(get_current_user)):
+    """Get user's inventory"""
+    if current_user["role"] != "child":
+        raise HTTPException(status_code=403, detail="Only children have inventory")
+    
+    inventory_ids = current_user.get("inventory", [])
+    if not inventory_ids:
+        return []
+    
+    # Get full item details for inventory
+    items = await db.xp_store_items.find({"id": {"$in": inventory_ids}}, {"_id": 0}).to_list(100)
+    return items
+
+@api_router.post("/store/equip")
+async def equip_item(equip_data: dict, current_user: dict = Depends(get_current_user)):
+    """Equip an avatar or accessory"""
+    if current_user["role"] != "child":
+        raise HTTPException(status_code=403, detail="Only children can equip items")
+    
+    item_id = equip_data.get("item_id")
+    if not item_id:
+        raise HTTPException(status_code=400, detail="item_id is required")
+    
+    # Check if item is in inventory
+    if item_id not in current_user.get("inventory", []):
+        raise HTTPException(status_code=400, detail="Item not in inventory")
+    
+    # Get item details
+    item = await db.xp_store_items.find_one({"id": item_id}, {"_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    # Equip based on type
+    if item["item_type"] == "avatar":
+        # Equip avatar
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"current_avatar": item_id, "avatar": item["asset_url"]}}
+        )
+        return {"success": True, "message": f"Avatar {item['item_name']} equipado!"}
+    else:
+        # Equip accessory (add to current_accessories if not already there)
+        current_accessories = current_user.get("current_accessories", [])
+        if item_id not in current_accessories:
+            await db.users.update_one(
+                {"id": current_user["id"]},
+                {"$push": {"current_accessories": item_id}}
+            )
+            return {"success": True, "message": f"Acessório {item['item_name']} equipado!"}
+        else:
+            raise HTTPException(status_code=400, detail="Accessory already equipped")
+
+@api_router.post("/store/unequip")
+async def unequip_item(unequip_data: dict, current_user: dict = Depends(get_current_user)):
+    """Unequip an accessory"""
+    if current_user["role"] != "child":
+        raise HTTPException(status_code=403, detail="Only children can unequip items")
+    
+    item_id = unequip_data.get("item_id")
+    if not item_id:
+        raise HTTPException(status_code=400, detail="item_id is required")
+    
+    # Remove from current_accessories
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$pull": {"current_accessories": item_id}}
+    )
+    
+    return {"success": True, "message": "Acessório removido!"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
