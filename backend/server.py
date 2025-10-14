@@ -344,6 +344,99 @@ async def reset_pin(reset_data: PinReset):
     
     return {"message": "PIN redefinido com sucesso!"}
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request_data: dict):
+    """Request password reset token"""
+    email = request_data.get("email")
+    
+    if not email:
+        raise HTTPException(status_code=400, detail="Email é obrigatório")
+    
+    # Find user by email
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        # Return success even if user not found (security best practice)
+        return {
+            "success": True,
+            "message": "Se o email existir, um link de recuperação será enviado"
+        }
+    
+    # Check if it's a parent account (children use PIN, not password)
+    if user["role"] == "child":
+        raise HTTPException(
+            status_code=400, 
+            detail="Contas de crianças usam PIN. Use a recuperação de PIN."
+        )
+    
+    # Generate secure token
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+    
+    # Store token
+    reset_token = PasswordResetToken(
+        user_id=user["id"],
+        token=token,
+        expires_at=expires_at
+    )
+    
+    token_doc = reset_token.model_dump()
+    token_doc['created_at'] = token_doc['created_at'].isoformat()
+    token_doc['expires_at'] = token_doc['expires_at'].isoformat()
+    
+    await db.password_reset_tokens.insert_one(token_doc)
+    
+    # In production, send email here
+    # For now, return token (mock email system)
+    return {
+        "success": True,
+        "message": "Token de recuperação gerado com sucesso!",
+        "token": token,  # In production, this would be sent via email
+        "note": "Copie este token para usar na próxima tela (válido por 1 hora)"
+    }
+
+@api_router.post("/auth/reset-password-with-token")
+async def reset_password_with_token(reset_data: dict):
+    """Reset password using token"""
+    token = reset_data.get("token")
+    new_password = reset_data.get("new_password")
+    
+    if not token or not new_password:
+        raise HTTPException(status_code=400, detail="Token e nova senha são obrigatórios")
+    
+    # Find valid token
+    token_doc = await db.password_reset_tokens.find_one(
+        {"token": token, "used": False},
+        {"_id": 0}
+    )
+    
+    if not token_doc:
+        raise HTTPException(status_code=400, detail="Token inválido ou já utilizado")
+    
+    # Check if token expired
+    expires_at = datetime.fromisoformat(token_doc["expires_at"])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Token expirado. Solicite um novo.")
+    
+    # Hash new password
+    new_hashed_password = hash_password(new_password)
+    
+    # Update user password
+    await db.users.update_one(
+        {"id": token_doc["user_id"]},
+        {"$set": {"password": new_hashed_password}}
+    )
+    
+    # Mark token as used
+    await db.password_reset_tokens.update_one(
+        {"token": token},
+        {"$set": {"used": True}}
+    )
+    
+    return {
+        "success": True,
+        "message": "Senha redefinida com sucesso! Você já pode fazer login."
+    }
+
 # User routes
 @api_router.get("/users/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
