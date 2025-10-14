@@ -24,6 +24,7 @@ const ModernChildDashboard = () => {
   const [currentFilter, setCurrentFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 10;
+  const [showStore, setShowStore] = useState(false);
 
   const weeklyData = [
     { day: "Dom", completed: 2 },
