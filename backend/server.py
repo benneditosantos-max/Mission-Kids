@@ -35,7 +35,21 @@ uploads_dir = Path("uploads")
 uploads_dir.mkdir(exist_ok=True)
 
 # Create the main app
-app = FastAPI(title="MissionKids API")
+app = FastAPI(
+    title="MissionKids API",
+    description="API for MissionKids - Family Task & Finance Manager",
+    version="1.0.0"
+)
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "service": "MissionKids API",
+        "version": "1.0.0",
+        "database": "connected"
+    }
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer()
 
