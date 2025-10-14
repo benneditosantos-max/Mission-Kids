@@ -986,6 +986,126 @@ const ParentDashboard = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Task Dialog */}
+      <Dialog open={showEditTask} onOpenChange={setShowEditTask}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-nunito">Editar Tarefa</DialogTitle>
+            <DialogDescription>
+              Atualize os detalhes da tarefa
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleUpdateTask} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Criança</Label>
+              <Select value={taskForm.child_id} onValueChange={(value) => setTaskForm(prev => ({ ...prev, child_id: value }))} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma criança" />
+                </SelectTrigger>
+                <SelectContent>
+                  {children.map((child) => (
+                    <SelectItem key={child.id} value={child.id}>
+                      {child.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Título da Tarefa</Label>
+              <Input
+                placeholder="Ex: Arrumar a cama"
+                value={taskForm.title}
+                onChange={(e) => setTaskForm(prev => ({ ...prev, title: e.target.value }))}
+                required
+                className="rounded-xl"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Descrição (opcional)</Label>
+              <Textarea
+                placeholder="Descreva a tarefa..."
+                value={taskForm.description}
+                onChange={(e) => setTaskForm(prev => ({ ...prev, description: e.target.value }))}
+                className="rounded-xl"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Valor (R$)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.50"
+                  value={taskForm.value}
+                  onChange={(e) => setTaskForm(prev => ({ ...prev, value: e.target.value }))}
+                  required
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>XP</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={taskForm.xp}
+                  onChange={(e) => setTaskForm(prev => ({ ...prev, xp: e.target.value }))}
+                  required
+                  className="rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Frequência</Label>
+              <Select value={taskForm.frequency} onValueChange={(value) => setTaskForm(prev => ({ ...prev, frequency: value }))} required>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">📅 Diária</SelectItem>
+                  <SelectItem value="weekly">📆 Semanal</SelectItem>
+                  <SelectItem value="monthly">📋 Mensal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="edit-photo">Foto obrigatória?</Label>
+                <Switch
+                  id="edit-photo"
+                  checked={taskForm.photo_required}
+                  onCheckedChange={(checked) => setTaskForm(prev => ({ ...prev, photo_required: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="edit-approval">Requer aprovação?</Label>
+                <Switch
+                  id="edit-approval"
+                  checked={taskForm.approval_required}
+                  onCheckedChange={(checked) => setTaskForm(prev => ({ ...prev, approval_required: checked }))}
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl font-bold"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Atualizar Tarefa
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
