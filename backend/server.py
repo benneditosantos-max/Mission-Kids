@@ -186,6 +186,16 @@ class StoreItem(BaseModel):
     description: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class PasswordResetToken(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    token: str
+    expires_at: datetime
+    used: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Auth helpers
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
