@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import StoreModal from '@/components/StoreModal';
 
 const ModernChildDashboard = () => {
   const { user, logout, playSound, updateUser } = useAuth();
