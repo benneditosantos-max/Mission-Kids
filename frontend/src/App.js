@@ -1,22 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import '@/App.css';
 import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
 import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Shield, Flame, Database, Cloud } from 'lucide-react';
 
-// Import components - Modern Design (now default)
+// Import components
 import LoginScreen from '@/components/LoginScreen';
 import ChildDashboard from '@/components/ChildDashboard';
 import ParentDashboard from '@/components/ParentDashboard';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-
-// Import Firebase version
-import FirebaseApp from '@/components/FirebaseApp';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
