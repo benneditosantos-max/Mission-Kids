@@ -74,6 +74,10 @@ class User(BaseModel):
     allowance_goal: float = 50.0
     earned: float = 0.0  # Current balance available
     total_allowance: float = 0.0  # Total accumulated allowance over time
+    # XP Store fields
+    inventory: List[str] = []  # List of purchased item IDs
+    current_avatar: Optional[str] = None  # Currently equipped avatar ID
+    current_accessories: List[str] = []  # Currently equipped accessories IDs
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
