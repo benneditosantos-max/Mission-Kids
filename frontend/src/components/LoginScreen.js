@@ -14,6 +14,7 @@ const ModernLoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
   const [userType, setUserType] = useState('parent');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
