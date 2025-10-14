@@ -106,6 +106,18 @@ const ModernChildDashboard = () => {
     setCurrentPage(pageNumber);
   };
 
+  const handlePurchaseSuccess = (newXP) => {
+    // Update financial data with new XP
+    if (financialData) {
+      setFinancialData(prev => ({
+        ...prev,
+        xp: newXP
+      }));
+    }
+    // Refresh all data
+    fetchData();
+  };
+
   const handleCompleteTask = async (taskId) => {
     try {
       await axios.post(`/tasks/${taskId}/complete`);
