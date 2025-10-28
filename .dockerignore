@@ -1,0 +1,57 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+
+# Build outputs
+frontend/build/
+frontend/.next/
+backend/uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+.emergent/
+test_result.md
+FIREBASE_SETUP_GUIDE.md
+*.md
+!README.md
+!DEPLOYMENT_GUIDE.md
