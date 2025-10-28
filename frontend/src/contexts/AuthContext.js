@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for saved user
     const savedUser = localStorage.getItem('missionkids_user');
     if (savedUser) {
       try {
@@ -28,7 +27,6 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Save user to localStorage when it changes
   useEffect(() => {
     if (user) {
       localStorage.setItem('missionkids_user', JSON.stringify(user));
@@ -46,28 +44,25 @@ export const AuthProvider = ({ children }) => {
     toast.info('Até logo! 👋');
   };
 
-  const playSound = (type) => {
+  const playSound = (soundType) => {
     try {
       const audio = new Audio();
-      switch (type) {
-        case 'success':
-          audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHGGe57OeeSwwPUKzn8bllHQU2jdXyzncmBCh+zPDajj4JFF61',
-          break;
-        case 'logout':
-          audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHGGe57OeeSwwPUKzn8bllHQU2jdXyzncmBCh+zPDajj4JFF61',
-          break;
-        default:
-          return;
+      if (soundType === 'success') {
+        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHGGe57OeeSwwPUKzn8bllHQU2jdXyzncmBCh+zPDajj4JFF61';
+      } else if (soundType === 'logout') {
+        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHGGe57OeeSwwPUKzn8bllHQU2jdXyzncmBCh+zPDajj4JFF61';
+      } else {
+        return;
       }
       audio.volume = 0.3;
-      audio.play().catch(() => {}); // Ignore errors
+      audio.play().catch(() => {});
     } catch (e) {
-      // Ignore sound errors
+      // Silent fail
     }
   };
 
   const updateUser = (updates) => {
-    setUser(prev => ({ ...prev, ...updates }));
+    setUser((prev) => ({ ...prev, ...updates }));
   };
 
   const value = {
