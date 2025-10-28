@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  missionkids:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: missionkids-app
+    ports:
+      - "80:80"
+      - "8001:8001"
+    environment:
+      - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017}
+      - DB_NAME=${DB_NAME:-missionkids}
+      - JWT_SECRET=${JWT_SECRET:-change-this-in-production}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    volumes:
+      - ./backend/uploads:/app/backend/uploads
+    networks:
+      - missionkids-network
+
+  mongo:
+    image: mongo:5.0
+    container_name: missionkids-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=missionkids
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    restart: unless-stopped
+    networks:
+      - missionkids-network
+
+  # Optional: MongoDB Admin Interface
+  mongo-express:
+    image: mongo-express:latest
+    container_name: missionkids-mongo-admin
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - missionkids-network
+    profiles:
+      - admin
+
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+
+networks:
+  missionkids-network:
+    driver: bridge
