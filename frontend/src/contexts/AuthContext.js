@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'sonner';
 
 const AuthContext = createContext();
@@ -17,134 +16,68 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Verify token and get user info
-      axios.get('/users/me')
-        .then(response => {
-          setUser(response.data);
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
+    // Check localStorage for saved user
+    const savedUser = localStorage.getItem('missionkids_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('missionkids_user');
+      }
     }
+    setLoading(false);
   }, []);
 
-  const login = async (credentials) => {
-    try {
-      const response = await axios.post('/auth/login', credentials);
-      const { token, user: userData } = response.data;
-      
-      localStorage.setItem('token', token);
-      setUser(userData);
-      
-      // Play success sound
+  // Save user to localStorage when it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('missionkids_user', JSON.stringify(user));
       playSound('success');
-      
-      toast.success(`Bem-vindo${userData.role === 'child' ? 'a' : ''}, ${userData.name}! 🎉`);
-      
-      return userData;
-    } catch (error) {
-      const message = error.response?.data?.detail || 'Erro no login';
-      toast.error(message);
-      throw error;
+      toast.success(`Bem-vindo${user.role === 'child' ? '(a)' : ''}, ${user.name}! 🎉`);
+    } else {
+      localStorage.removeItem('missionkids_user');
     }
-  };
-
-  const register = async (userData) => {
-    try {
-      const response = await axios.post('/auth/register', userData);
-      const { token, user: newUser } = response.data;
-      
-      localStorage.setItem('token', token);
-      setUser(newUser);
-      
-      toast.success(`Conta criada com sucesso! Bem-vindo, ${newUser.name}! 🎉`);
-      
-      return newUser;
-    } catch (error) {
-      const message = error.response?.data?.detail || 'Erro no cadastro';
-      toast.error(message);
-      throw error;
-    }
-  };
+  }, [user]);
 
   const logout = () => {
-    localStorage.removeItem('token');
     setUser(null);
-    toast.info('Logout realizado com sucesso!');
+    localStorage.removeItem('missionkids_user');
+    playSound('logout');
+    toast.info('Até logo! 👋');
   };
 
-  const updateUser = (updatedData) => {
-    setUser(prev => ({ ...prev, ...updatedData }));
-  };
-
-  // Sound effects using Web Audio API
   const playSound = (type) => {
     try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      let frequency, duration;
-      
+      const audio = new Audio();
       switch (type) {
         case 'success':
-          frequency = 523.25; // C5
-          duration = 0.3;
+          audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHGGe57OeeSwwPUKzn8bllHQU2jdXyzncmBCh+zPDajj4JFF61',
           break;
-        case 'levelup':
-          frequency = 659.25; // E5
-          duration = 0.5;
-          break;
-        case 'coin':
-          frequency = 880; // A5
-          duration = 0.2;
-          break;
-        case 'complete':
-          frequency = 440; // A4
-          duration = 0.4;
+        case 'logout':
+          audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYHGGe57OeeSwwPUKzn8bllHQU2jdXyzncmBCh+zPDajj4JFF61',
           break;
         default:
-          frequency = 261.63; // C4
-          duration = 0.2;
+          return;
       }
-      
-      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-      oscillator.type = 'sine';
-      
-      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
-    } catch (error) {
-      // Fallback for browsers that don't support Web Audio API
-      console.log(`Sound: ${type}`);
+      audio.volume = 0.3;
+      audio.play().catch(() => {}); // Ignore errors
+    } catch (e) {
+      // Ignore sound errors
     }
+  };
+
+  const updateUser = (updates) => {
+    setUser(prev => ({ ...prev, ...updates }));
   };
 
   const value = {
     user,
     loading,
-    login,
-    register,
+    setUser,
     logout,
-    updateUser,
-    playSound
+    playSound,
+    updateUser
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
